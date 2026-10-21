@@ -7,6 +7,7 @@ import FormCheckbox from "../../../components/form/FormCheckbox";
 import FormActions from "../../../components/form/FormActions";
 import { loginSchema, type LoginFormValues } from "../../../schemas/loginSchema";
 import { useAuthStore } from "../../../store/authStore";
+import { toast } from "../../../store/toastStore";
 
 const LoginPage = () => {
   const {
@@ -27,7 +28,10 @@ const LoginPage = () => {
   const onSubmit = async (values: LoginFormValues) => {
     const success = await login(values);
     if (success) {
+      toast.success("Logged in successfully");
       navigate("/dashboard", { replace: true });
+    } else {
+      toast.error(useAuthStore.getState().error ?? "Login failed");
     }
   };
 

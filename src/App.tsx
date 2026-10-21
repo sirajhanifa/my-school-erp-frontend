@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import LoginPage from "./modules/auth/login/LoginPage";
 import DashboardPage from "./modules/dashboard/DashboardPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Toaster from "./components/toast/Toaster";
 import { useAuthStore } from "./store/authStore";
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
           }
         />
       </Routes>
+      <Toaster />
     </BrowserRouter>
   );
 };

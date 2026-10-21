@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+@theme {
+  --animate-toast-progress: toast-progress linear forwards;
+
+  @keyframes toast-progress {
+    from {
+      transform: scaleX(1);
+    }
+    to {
+      transform: scaleX(0);
+    }
+  }
+}

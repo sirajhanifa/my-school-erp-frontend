@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 import { useAuthStore } from "../../store/authStore";
+import { toast } from "../../store/toastStore";
 
 // Placeholder page shown after login. Replace with the real dashboard later.
 const DashboardPage = () => {
@@ -9,6 +10,7 @@ const DashboardPage = () => {
 
   const handleLogout = async () => {
     await logout();
+    toast.info("You have been logged out");
     navigate("/login", { replace: true });
   };
 
