@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
   --animate-toast-progress: toast-progress linear forwards;
 
   @keyframes toast-progress {
