@@ -35,8 +35,7 @@ const pageButtonClassName = `${pageButtonBaseClassName} border border-slate-300 
 const currentPageButtonClassName = `${pageButtonBaseClassName} border border-blue-600 bg-blue-600 text-white`;
 
 // A table with a search box on top and pagination below.
-// Search and paging happen in the browser on the items you pass in,
-// so the page only has to load its data once.
+// Search and paging run in the browser on the items you pass in.
 function List<T>({
   items,
   columns,

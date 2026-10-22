@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { isAxiosError } from "axios";
 import AppLayout from "../../../components/layout/AppLayout";
 import FormContainer from "../../../components/form/FormContainer";
 import FormInput from "../../../components/form/FormInput";
@@ -9,30 +8,22 @@ import FormTextarea from "../../../components/form/FormTextarea";
 import FormActions from "../../../components/form/FormActions";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
-import api from "../../../components/axios/axios";
 import { classSchema, type ClassFormValues } from "../../../schemas/classSchema";
-import { toast } from "../../../store/toastStore";
+import { useClassStore, type SchoolClass } from "../../../store/classStore";
 import { toDateString } from "../../../utils/date";
-
-// A class as returned by the backend
-interface SchoolClass {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: string;
-}
 
 const emptyForm: ClassFormValues = { name: "", description: "" };
 
-// Shows the backend's message if there is one, otherwise the fallback
-const getErrorMessage = (error: unknown, fallback: string) =>
-  (isAxiosError(error) ? error.response?.data?.message : undefined) ?? fallback;
-
-// One page for everything: the form at the top adds a class (or edits the one picked
-// with "Edit"), and the table below lists the school's classes.
+// Form on top adds a class (or edits the one picked with "Edit"), list below.
+// All API calls live in classStore.
 const ClassesPage = () => {
-  const [classes, setClasses] = useState<SchoolClass[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const classes = useClassStore((state) => state.classes);
+  const isLoading = useClassStore((state) => state.isLoading);
+  const fetchClasses = useClassStore((state) => state.fetchClasses);
+  const createClass = useClassStore((state) => state.createClass);
+  const updateClass = useClassStore((state) => state.updateClass);
+  const deleteClass = useClassStore((state) => state.deleteClass);
+
   // The class being edited; null = the form adds a new class
   const [editingClass, setEditingClass] = useState<SchoolClass | null>(null);
 
@@ -46,18 +37,10 @@ const ClassesPage = () => {
     defaultValues: emptyForm,
   });
 
-  // Increase this to load the list again (after adding, updating or deleting a class)
-  const [reloadCount, setReloadCount] = useState(0);
-  const reloadClasses = () => setReloadCount((count) => count + 1);
-
-  // Load the classes when the page opens, and again whenever reloadCount changes
+  // Load the classes once when the page opens
   useEffect(() => {
-    api
-      .get("/classes")
-      .then((response) => setClasses(response.data.classes))
-      .catch((error) => toast.error(getErrorMessage(error, "Could not load classes")))
-      .finally(() => setIsLoading(false));
-  }, [reloadCount]);
+    fetchClasses();
+  }, [fetchClasses]);
 
   // Back to "Add" mode with an empty form
   const resetForm = () => {
@@ -70,32 +53,21 @@ const ClassesPage = () => {
     reset({ name: cls.name, description: cls.description });
   };
 
+  // The store shows the success/error toast; we only clear the form when it worked
   const onSubmit = async (values: ClassFormValues) => {
-    try {
-      const response = editingClass
-        ? await api.put(`/classes/${editingClass.id}`, values)
-        : await api.post("/classes", values);
+    const success = editingClass
+      ? await updateClass(editingClass.id, values)
+      : await createClass(values);
 
-      toast.success(response.data.message);
-      resetForm();
-      reloadClasses();
-    } catch (error) {
-      toast.error(getErrorMessage(error, "Could not save the class"));
-    }
+    if (success) resetForm();
   };
 
   const handleDelete = async (cls: SchoolClass) => {
     if (!window.confirm(`Delete class "${cls.name}"?`)) return;
 
-    try {
-      const response = await api.delete(`/classes/${cls.id}`);
-      toast.success(response.data.message);
-      // If the deleted class was open in the form, clear the form
-      if (editingClass?.id === cls.id) resetForm();
-      reloadClasses();
-    } catch (error) {
-      toast.error(getErrorMessage(error, "Could not delete the class"));
-    }
+    const success = await deleteClass(cls.id);
+    // If the deleted class was open in the form, clear the form
+    if (success && editingClass?.id === cls.id) resetForm();
   };
 
   return (

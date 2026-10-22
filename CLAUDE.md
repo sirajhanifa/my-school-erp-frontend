@@ -27,7 +27,7 @@ src/
     toast/Toaster.tsx  renders toasts from toastStore
     icon/Icon.tsx      <Icon name="User" /> — any lucide-react icon by name
     ProtectedRoute.tsx wrap pages that need login
-  store/               Zustand stores (authStore, toastStore)
+  store/               Zustand stores (authStore, toastStore, moduleStore, classStore)
   schemas/             Zod schemas + inferred form types
   utils/
 ```
@@ -40,10 +40,12 @@ src/
 - **Lists**: use `components/list/List.tsx` for list pages — pass `items`, `columns` (`{ header, render, className? }`), `getKey` and `getSearchText`. Search and pagination run in the browser on the loaded items.
 - **Toasts**: `import { toast } from ".../store/toastStore"` (relative path; there is no `src` alias) → `toast.success(...)`, `toast.error(...)`. Works outside React too.
 - **State**: Zustand stores with `create<State>()((set) => ({ ... }))`; select single fields: `useAuthStore((s) => s.user)`.
+- **API calls live in stores, not in page components** (see `classStore`): the store calls the API, updates its state, shows the toast, and returns `true`/`false` so the page can react (e.g. clear its form).
 - **Router**: import from `"react-router"` (v7), not `react-router-dom`.
 - Styling is Tailwind utility classes with the slate palette and blue accents; no CSS modules or component library.
 - Local imports have no file extension (bundler resolution). Components are default-exported arrow functions (form-kit components are generic `function`s).
 - Comments are plain-English and explain *why* (the codebase is written to be readable by learners). Keep that style.
+- Keep comments simple and clear: one or two lines maximum. Avoid long explanations in comments.
 - Dates as `YYYY-MM-DD` in local time: use `utils/date.ts`, not `toISOString()` (it shifts to UTC).
 
 ## Auth flow
