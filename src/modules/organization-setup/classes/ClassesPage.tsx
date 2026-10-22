@@ -7,8 +7,8 @@ import FormContainer from "../../../components/form/FormContainer";
 import FormInput from "../../../components/form/FormInput";
 import FormTextarea from "../../../components/form/FormTextarea";
 import FormActions from "../../../components/form/FormActions";
-import Spinner from "../../../components/form/Spinner";
 import Icon from "../../../components/icon/Icon";
+import List from "../../../components/list/List";
 import api from "../../../components/axios/axios";
 import { classSchema, type ClassFormValues } from "../../../schemas/classSchema";
 import { toast } from "../../../store/toastStore";
@@ -133,66 +133,51 @@ const ClassesPage = () => {
           />
         </FormContainer>
 
-        {/* overflow-x-auto: the table scrolls sideways on small screens */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Description</th>
-                <th className="px-4 py-3">Created</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              {isLoading && (
-                <tr>
-                  <td colSpan={4} className="py-8">
-                    <div className="flex justify-center text-slate-500">
-                      <Spinner className="h-5 w-5" />
-                    </div>
-                  </td>
-                </tr>
-              )}
-
-              {!isLoading && classes.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
-                    No classes yet. Add your first class above.
-                  </td>
-                </tr>
-              )}
-
-              {classes.map((cls) => (
-                <tr key={cls.id} className="hover:bg-slate-50">
-                  <td className="whitespace-nowrap px-4 py-3 font-medium text-slate-900">{cls.name}</td>
-                  <td className="px-4 py-3">{cls.description || "-"}</td>
-                  <td className="whitespace-nowrap px-4 py-3">{toDateString(new Date(cls.createdAt))}</td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <div className="flex justify-end gap-1">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(cls)}
-                        aria-label={`Edit ${cls.name}`}
-                        className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-600"
-                      >
-                        <Icon name="Pencil" size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(cls)}
-                        aria-label={`Delete ${cls.name}`}
-                        className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-red-600"
-                      >
-                        <Icon name="Trash2" size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <List
+          items={classes}
+          getKey={(cls) => cls.id}
+          getSearchText={(cls) => `${cls.name} ${cls.description}`}
+          searchPlaceholder="Search classes..."
+          isLoading={isLoading}
+          emptyMessage="No classes yet. Add your first class above."
+          columns={[
+            {
+              header: "Name",
+              render: (cls) => <span className="font-medium text-slate-900">{cls.name}</span>,
+              className: "whitespace-nowrap",
+            },
+            { header: "Description", render: (cls) => cls.description || "-" },
+            {
+              header: "Created",
+              render: (cls) => toDateString(new Date(cls.createdAt)),
+              className: "whitespace-nowrap",
+            },
+            {
+              header: "Actions",
+              className: "whitespace-nowrap text-right",
+              render: (cls) => (
+                <div className="flex justify-end gap-1">
+                  <button
+                    type="button"
+                    onClick={() => startEdit(cls)}
+                    aria-label={`Edit ${cls.name}`}
+                    className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-600"
+                  >
+                    <Icon name="Pencil" size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(cls)}
+                    aria-label={`Delete ${cls.name}`}
+                    className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-red-600"
+                  >
+                    <Icon name="Trash2" size={16} />
+                  </button>
+                </div>
+              ),
+            },
+          ]}
+        />
       </div>
     </AppLayout>
   );

@@ -37,6 +37,7 @@ src/
 - **Pages**: add under `src/modules/<feature>/`, register in `App.tsx`, wrap in `<ProtectedRoute>` unless public.
 - **Forms**: React Hook Form with `zodResolver(schema)`. Put the schema in `src/schemas/<name>Schema.ts` and export `type XFormValues = z.infer<typeof xSchema>`. Validation rules live in the Zod schema; the `required` prop on form components only shows the `*` marker.
 - **Use the form kit** in `components/form/` instead of raw inputs: `FormContainer`, `FormSection`, `FormInput`, `FormSelect`, `FormAutocomplete`, `FormCheckbox`, `FormDatePicker`, `FormTextarea`, `FormActions`, `Spinner`. Shared input styling is in `formStyles.ts` — change the look there, not per component. Components are generic over the form type and take `register` + `error`.
+- **Lists**: use `components/list/List.tsx` for list pages — pass `items`, `columns` (`{ header, render, className? }`), `getKey` and `getSearchText`. Search and pagination run in the browser on the loaded items.
 - **Toasts**: `import { toast } from ".../store/toastStore"` (relative path; there is no `src` alias) → `toast.success(...)`, `toast.error(...)`. Works outside React too.
 - **State**: Zustand stores with `create<State>()((set) => ({ ... }))`; select single fields: `useAuthStore((s) => s.user)`.
 - **Router**: import from `"react-router"` (v7), not `react-router-dom`.
