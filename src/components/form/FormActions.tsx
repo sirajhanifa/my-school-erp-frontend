@@ -11,16 +11,29 @@ type FormActionsProps = {
   disabled?: boolean;
 };
 
+// Shared by all buttons: same height, shape and text, so they line up in the row.
+// "enabled:" = hover and press effects only apply when the button can be clicked.
 const buttonBaseClassName =
-  "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium " +
-  "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 " +
+  "inline-flex h-10 min-w-24 items-center justify-center gap-2 rounded-lg px-5 text-sm font-bold " +
+  "transition duration-150 ease-in-out enabled:active:scale-[0.98] " +
+  // Focus ring only for keyboard users (not on mouse click)
+  "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 " +
   "disabled:cursor-not-allowed disabled:opacity-60";
 
-const primaryButtonClassName = `${buttonBaseClassName} bg-blue-600 text-white shadow-xs hover:bg-blue-700`;
+// Submit: the main action, solid blue
+const primaryButtonClassName =
+  `${buttonBaseClassName} bg-blue-600 text-white shadow-sm ` +
+  "enabled:hover:bg-blue-700 enabled:hover:shadow-md focus-visible:ring-blue-500";
 
-const secondaryButtonClassName = `${buttonBaseClassName} border border-slate-300 bg-white text-slate-700 shadow-xs hover:bg-slate-50`;
+// Save: a secondary action, white with a border
+const secondaryButtonClassName =
+  `${buttonBaseClassName} border border-slate-300 bg-white text-slate-700 shadow-xs ` +
+  "enabled:hover:border-slate-400 enabled:hover:bg-slate-50 focus-visible:ring-blue-500";
 
-const ghostButtonClassName = `${buttonBaseClassName} text-slate-600 hover:bg-slate-100`;
+// Cancel: the least important action, text only
+const ghostButtonClassName =
+  `${buttonBaseClassName} text-slate-600 ` +
+  "enabled:hover:bg-slate-100 enabled:hover:text-slate-900 focus-visible:ring-slate-400";
 
 // The row of buttons at the bottom of every form: Cancel, Save and Submit.
 const FormActions = ({
@@ -35,7 +48,9 @@ const FormActions = ({
   const isDisabled = disabled || isSubmitting;
 
   return (
-    <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end">
+    // Phones: full-width buttons stacked with Submit on top.
+    // From "sm" up: one row aligned to the right.
+    <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-end">
       {onCancel && (
         <button type="button" onClick={onCancel} disabled={isSubmitting} className={ghostButtonClassName}>
           {cancelLabel}
@@ -48,7 +63,8 @@ const FormActions = ({
         </button>
       )}
 
-      <button type="submit" disabled={isDisabled} className={primaryButtonClassName}>
+      {/* aria-busy tells screen readers the form is being submitted */}
+      <button type="submit" disabled={isDisabled} aria-busy={isSubmitting} className={primaryButtonClassName}>
         {isSubmitting && <Spinner />}
         {isSubmitting ? "Please wait..." : submitLabel}
       </button>
