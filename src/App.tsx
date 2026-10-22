@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import LoginPage from "./modules/auth/login/LoginPage";
 import DashboardPage from "./modules/dashboard/DashboardPage";
+import ClassesPage from "./modules/organization-setup/classes/ClassesPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toaster from "./components/toast/Toaster";
 import { useAuthStore } from "./store/authStore";
@@ -24,6 +25,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organization-setup/classes"
+          element={
+            <ProtectedRoute>
+              <ClassesPage />
             </ProtectedRoute>
           }
         />
