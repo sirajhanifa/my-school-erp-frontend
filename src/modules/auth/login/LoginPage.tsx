@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Navigate, useNavigate } from "react-router";
 import FormContainer from "../../../components/form/FormContainer";
 import FormInput from "../../../components/form/FormInput";
-import FormCheckbox from "../../../components/form/FormCheckbox";
 import FormActions from "../../../components/form/FormActions";
 import { loginSchema, type LoginFormValues } from "../../../schemas/loginSchema";
 import { useAuthStore } from "../../../store/authStore";
@@ -16,7 +15,7 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "", rememberMe: false },
+    defaultValues: { email: "", password: "" },
   });
 
   const navigate = useNavigate();
@@ -75,8 +74,6 @@ const LoginPage = () => {
               required
               error={errors.password?.message}
             />
-
-            <FormCheckbox name="rememberMe" label="Remember me" register={register} />
           </div>
 
           <FormActions submitLabel="Login" isSubmitting={isLoading} fullWidth />
