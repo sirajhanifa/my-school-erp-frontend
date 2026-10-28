@@ -7,24 +7,22 @@ import NotificationMenu from "./NotificationMenu";
 import ProfileMenu from "./ProfileMenu";
 
 interface TopbarProps {
-  title?: string; // used when the current URL is not in the menu
   onMenuClick: () => void; // opens the sidebar on mobile
 }
 
 // Bar at the top of every logged-in page: page title, search, notifications, profile
-const Topbar = ({ title, onMenuClick }: TopbarProps) => {
+const Topbar = ({ onMenuClick }: TopbarProps) => {
   const location = useLocation();
   const modules = useModuleStore((state) => state.modules);
   // On phones the search box is hidden behind an icon to save space
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
-  // Find the menu entry for the current URL, so the title matches the sidebar
+  // Find the menu entry for the current URL, so the title matches the sidebar.
+  // Empty until the menu has loaded (or if the page is not in the menu).
   const pageTitle =
     modules
       .flatMap((menu) => [menu, ...menu.subMenus])
-      .find((item) => item.path === location.pathname)?.name ??
-    title ??
-    "Dashboard";
+      .find((item) => item.path === location.pathname)?.name ?? "";
 
   return (
     <header className="shrink-0 border-b border-slate-200 bg-white">

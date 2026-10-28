@@ -64,7 +64,8 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </button>
         </div>
 
-        {isLoading && (
+        {/* Spinner only on the first load, not on top of a menu we already show */}
+        {isLoading && modules.length === 0 && (
           <div className="flex justify-center py-6 text-slate-500">
             <Spinner className="h-5 w-5" />
           </div>

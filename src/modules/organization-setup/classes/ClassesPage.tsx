@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import AppLayout from "../../../components/layout/AppLayout";
 import FormContainer from "../../../components/form/FormContainer";
 import FormInput from "../../../components/form/FormInput";
 import FormTextarea from "../../../components/form/FormTextarea";
@@ -71,87 +70,85 @@ const ClassesPage = () => {
   };
 
   return (
-    <AppLayout title="Classes">
-      <div className="mx-auto max-w-4xl space-y-6">
-        <FormContainer
-          title={editingClass ? "Edit Class" : "Add Class"}
-          size="full"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <div className="space-y-5">
-            <FormInput
-              name="name"
-              label="Name"
-              placeholder="e.g. Class 1"
-              register={register}
-              required
-              error={errors.name?.message}
-            />
-            <FormTextarea
-              name="description"
-              label="Description"
-              placeholder="Optional"
-              rows={3}
-              register={register}
-              error={errors.description?.message}
-            />
-          </div>
-
-          <FormActions
-            submitLabel={editingClass ? "Update" : "Add"}
-            isSubmitting={isSubmitting}
-            // Cancel only makes sense while editing
-            {...(editingClass && { onCancel: resetForm })}
+    <div className="mx-auto max-w-4xl space-y-6">
+      <FormContainer
+        title={editingClass ? "Edit Class" : "Add Class"}
+        size="full"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <div className="space-y-5">
+          <FormInput
+            name="name"
+            label="Name"
+            placeholder="e.g. Class 1"
+            register={register}
+            required
+            error={errors.name?.message}
           />
-        </FormContainer>
+          <FormTextarea
+            name="description"
+            label="Description"
+            placeholder="Optional"
+            rows={3}
+            register={register}
+            error={errors.description?.message}
+          />
+        </div>
 
-        <List
-          items={classes}
-          getKey={(cls) => cls.id}
-          getSearchText={(cls) => `${cls.name} ${cls.description}`}
-          searchPlaceholder="Search classes..."
-          isLoading={isLoading}
-          emptyMessage="No classes yet. Add your first class above."
-          columns={[
-            {
-              header: "Name",
-              render: (cls) => <span className="font-medium text-slate-900">{cls.name}</span>,
-              className: "whitespace-nowrap",
-            },
-            { header: "Description", render: (cls) => cls.description || "-" },
-            {
-              header: "Created",
-              render: (cls) => toDateString(new Date(cls.createdAt)),
-              className: "whitespace-nowrap",
-            },
-            {
-              header: "Actions",
-              className: "whitespace-nowrap text-right",
-              render: (cls) => (
-                <div className="flex justify-end gap-1">
-                  <button
-                    type="button"
-                    onClick={() => startEdit(cls)}
-                    aria-label={`Edit ${cls.name}`}
-                    className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-600"
-                  >
-                    <Icon name="Pencil" size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(cls)}
-                    aria-label={`Delete ${cls.name}`}
-                    className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-red-600"
-                  >
-                    <Icon name="Trash2" size={16} />
-                  </button>
-                </div>
-              ),
-            },
-          ]}
+        <FormActions
+          submitLabel={editingClass ? "Update" : "Add"}
+          isSubmitting={isSubmitting}
+          // Cancel only makes sense while editing
+          {...(editingClass && { onCancel: resetForm })}
         />
-      </div>
-    </AppLayout>
+      </FormContainer>
+
+      <List
+        items={classes}
+        getKey={(cls) => cls.id}
+        getSearchText={(cls) => `${cls.name} ${cls.description}`}
+        searchPlaceholder="Search classes..."
+        isLoading={isLoading}
+        emptyMessage="No classes yet. Add your first class above."
+        columns={[
+          {
+            header: "Name",
+            render: (cls) => <span className="font-medium text-slate-900">{cls.name}</span>,
+            className: "whitespace-nowrap",
+          },
+          { header: "Description", render: (cls) => cls.description || "-" },
+          {
+            header: "Created",
+            render: (cls) => toDateString(new Date(cls.createdAt)),
+            className: "whitespace-nowrap",
+          },
+          {
+            header: "Actions",
+            className: "whitespace-nowrap text-right",
+            render: (cls) => (
+              <div className="flex justify-end gap-1">
+                <button
+                  type="button"
+                  onClick={() => startEdit(cls)}
+                  aria-label={`Edit ${cls.name}`}
+                  className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-600"
+                >
+                  <Icon name="Pencil" size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(cls)}
+                  aria-label={`Delete ${cls.name}`}
+                  className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-red-600"
+                >
+                  <Icon name="Trash2" size={16} />
+                </button>
+              </div>
+            ),
+          },
+        ]}
+      />
+    </div>
   );
 };
 

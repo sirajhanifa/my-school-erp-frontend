@@ -27,6 +27,7 @@ interface ModuleState {
   modules: MainMenu[];
   isLoading: boolean;
   fetchModules: () => Promise<void>;
+  reset: () => void;
 }
 
 // Holds the menu of the logged-in user's school.
@@ -42,10 +43,14 @@ export const useModuleStore = create<ModuleState>()((set) => ({
       const response = await api.get("/modules");
       set({ modules: response.data.modules, isLoading: false });
     } catch (error) {
-      set({ modules: [], isLoading: false });
+      // Keep the menu we already have, so a failed reload doesn't empty the sidebar
+      set({ isLoading: false });
       // Show the backend's message if there is one, otherwise a generic one
       const message = isAxiosError(error) ? error.response?.data?.message : undefined;
       toast.error(message ?? "Could not load the menu");
     }
   },
+
+  // Called on logout, so the next user never sees the previous school's menu
+  reset: () => set({ modules: [], isLoading: false }),
 }));
