@@ -9,6 +9,8 @@ type FormActionsProps = {
   onCancel?: () => void;
   isSubmitting?: boolean;
   disabled?: boolean;
+  // Stretch the buttons to fill the row (e.g. the Login button)
+  fullWidth?: boolean;
 };
 
 // Shared by all buttons: same height, shape and text, so they line up in the row.
@@ -44,13 +46,16 @@ const FormActions = ({
   onCancel,
   isSubmitting = false,
   disabled = false,
+  fullWidth = false,
 }: FormActionsProps) => {
   const isDisabled = disabled || isSubmitting;
+  // Full width: buttons fill the row. Otherwise: buttons sit on the right from "sm" up.
+  const rowLayoutClassName = fullWidth ? "" : "sm:flex-row sm:items-center sm:justify-end";
 
   return (
     // Phones: full-width buttons stacked with Submit on top.
     // From "sm" up: one row aligned to the right.
-    <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-end">
+    <div className={`flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 ${rowLayoutClassName}`}>
       {onCancel && (
         <button type="button" onClick={onCancel} disabled={isSubmitting} className={ghostButtonClassName}>
           {cancelLabel}

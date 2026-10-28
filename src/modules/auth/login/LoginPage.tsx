@@ -79,7 +79,7 @@ const LoginPage = () => {
             <FormCheckbox name="rememberMe" label="Remember me" register={register} />
           </div>
 
-          <FormActions submitLabel="Sign in" isSubmitting={isLoading} />
+          <FormActions submitLabel="Login" isSubmitting={isLoading} fullWidth />
         </FormContainer>
       </div>
     </div>
