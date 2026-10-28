@@ -34,6 +34,9 @@ const pageButtonClassName = `${pageButtonBaseClassName} border border-slate-300 
 
 const currentPageButtonClassName = `${pageButtonBaseClassName} border border-blue-600 bg-blue-600 text-white`;
 
+// Same side padding everywhere, so search, headers, cells and footer line up
+const cellPaddingClassName = "px-4 sm:px-6";
+
 // A table with a search box on top and pagination below.
 // Search and paging run in the browser on the items you pass in.
 function List<T>({
@@ -76,13 +79,14 @@ function List<T>({
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+    // overflow-hidden: keeps the grey header inside the rounded corners
+    <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       {/* Search box */}
-      <div className="border-b border-slate-200 p-4">
+      <div className={`border-b border-slate-200 py-4 ${cellPaddingClassName}`}>
         <label htmlFor={searchId} className="sr-only">
           Search
         </label>
-        <div className="relative max-w-sm">
+        <div className="relative w-full sm:max-w-xs">
           <Icon
             name="Search"
             size={16}
@@ -101,11 +105,15 @@ function List<T>({
 
       {/* Table. overflow-x-auto: scrolls sideways on small screens */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wide text-slate-500 uppercase">
+        <table className="w-full text-sm">
+          <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs font-medium tracking-wider whitespace-nowrap text-slate-500 uppercase">
             <tr>
               {columns.map((column) => (
-                <th key={column.header} className={`px-4 py-3 ${column.className ?? ""}`}>
+                <th
+                  key={column.header}
+                  scope="col"
+                  className={`py-3 ${cellPaddingClassName} ${column.className ?? ""}`}
+                >
                   {column.header}
                 </th>
               ))}
@@ -114,7 +122,7 @@ function List<T>({
           <tbody className="divide-y divide-slate-100 text-slate-700">
             {isLoading && (
               <tr>
-                <td colSpan={columns.length} className="py-8">
+                <td colSpan={columns.length} className="py-12">
                   <div className="flex justify-center text-slate-500">
                     <Spinner className="h-5 w-5" />
                   </div>
@@ -125,7 +133,10 @@ function List<T>({
             {/* Nothing to show: either no data at all, or nothing matches the search */}
             {!isLoading && pageItems.length === 0 && (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-slate-500">
+                <td
+                  colSpan={columns.length}
+                  className={`py-12 text-center text-slate-500 ${cellPaddingClassName}`}
+                >
                   {items.length === 0 ? emptyMessage : `No results for "${search.trim()}"`}
                 </td>
               </tr>
@@ -133,9 +144,15 @@ function List<T>({
 
             {!isLoading &&
               pageItems.map((item) => (
-                <tr key={getKey(item)} className="hover:bg-slate-50">
+                <tr
+                  key={getKey(item)}
+                  className="transition-colors duration-150 hover:bg-slate-50/80"
+                >
                   {columns.map((column) => (
-                    <td key={column.header} className={`px-4 py-3 ${column.className ?? ""}`}>
+                    <td
+                      key={column.header}
+                      className={`py-3.5 align-middle ${cellPaddingClassName} ${column.className ?? ""}`}
+                    >
                       {column.render(item)}
                     </td>
                   ))}
@@ -147,7 +164,9 @@ function List<T>({
 
       {/* Pagination: only shown when there is something to page through */}
       {!isLoading && filteredItems.length > 0 && (
-        <div className="flex flex-col items-center gap-3 border-t border-slate-200 px-4 py-3 sm:flex-row sm:justify-between">
+        <div
+          className={`flex flex-col items-center gap-3 border-t border-slate-200 py-3 sm:flex-row sm:justify-between ${cellPaddingClassName}`}
+        >
           <p className="text-sm text-slate-600">
             Showing <span className="font-medium">{startIndex + 1}</span>–
             <span className="font-medium">{startIndex + pageItems.length}</span> of{" "}

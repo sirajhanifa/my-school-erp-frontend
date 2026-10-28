@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
+import { useOutletContext } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormContainer from "../../../components/form/FormContainer";
 import FormInput from "../../../components/form/FormInput";
@@ -7,13 +9,20 @@ import FormTextarea from "../../../components/form/FormTextarea";
 import FormActions from "../../../components/form/FormActions";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
+import type { AppLayoutContext } from "../../../components/layout/AppLayout";
 import { classSchema, type ClassFormValues } from "../../../schemas/classSchema";
 import { useClassStore, type SchoolClass } from "../../../store/classStore";
 import { toDateString } from "../../../utils/date";
 
 const emptyForm: ClassFormValues = { name: "", description: "" };
 
-// Form on top adds a class (or edits the one picked with "Edit"), list below.
+// Same look as the form's submit button, a bit shorter to fit the topbar
+const addButtonClassName =
+  "inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white " +
+  "shadow-sm transition duration-150 hover:bg-blue-700 hover:shadow-md active:scale-[0.98] sm:px-4 " +
+  "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2";
+
+// Shows the class list; "Add Class" (topbar) or "Edit" swaps it for the form.
 // All API calls live in classStore.
 const ClassesPage = () => {
   const classes = useClassStore((state) => state.classes);
@@ -23,6 +32,11 @@ const ClassesPage = () => {
   const updateClass = useClassStore((state) => state.updateClass);
   const deleteClass = useClassStore((state) => state.deleteClass);
 
+  // The topbar slot from AppLayout, where the "Add Class" button goes
+  const { topbarActions } = useOutletContext<AppLayoutContext>();
+
+  // false = show the list, true = show the form
+  const [isFormOpen, setIsFormOpen] = useState(false);
   // The class being edited; null = the form adds a new class
   const [editingClass, setEditingClass] = useState<SchoolClass | null>(null);
 
@@ -41,114 +55,128 @@ const ClassesPage = () => {
     fetchClasses();
   }, [fetchClasses]);
 
-  // Back to "Add" mode with an empty form
-  const resetForm = () => {
+  const openAddForm = () => {
+    setEditingClass(null);
+    reset(emptyForm);
+    setIsFormOpen(true);
+  };
+
+  const openEditForm = (cls: SchoolClass) => {
+    setEditingClass(cls);
+    reset({ name: cls.name, description: cls.description });
+    setIsFormOpen(true);
+  };
+
+  // Back to the list with an empty form; nothing is saved
+  const closeForm = () => {
+    setIsFormOpen(false);
     setEditingClass(null);
     reset(emptyForm);
   };
 
-  const startEdit = (cls: SchoolClass) => {
-    setEditingClass(cls);
-    reset({ name: cls.name, description: cls.description });
-  };
-
-  // The store shows the success/error toast; we only clear the form when it worked
+  // The store shows the toast and updates the list; we only close the form when it worked
   const onSubmit = async (values: ClassFormValues) => {
     const success = editingClass
       ? await updateClass(editingClass.id, values)
       : await createClass(values);
 
-    if (success) resetForm();
+    if (success) closeForm();
   };
 
   const handleDelete = async (cls: SchoolClass) => {
     if (!window.confirm(`Delete class "${cls.name}"?`)) return;
-
-    const success = await deleteClass(cls.id);
-    // If the deleted class was open in the form, clear the form
-    if (success && editingClass?.id === cls.id) resetForm();
+    await deleteClass(cls.id);
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <FormContainer
-        title={editingClass ? "Edit Class" : "Add Class"}
-        size="full"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <div className="space-y-5">
-          <FormInput
-            name="name"
-            label="Name"
-            placeholder="e.g. Class 1"
-            register={register}
-            required
-            error={errors.name?.message}
-          />
-          <FormTextarea
-            name="description"
-            label="Description"
-            placeholder="Optional"
-            rows={3}
-            register={register}
-            error={errors.description?.message}
-          />
-        </div>
+    <>
+      {/* "Add Class" in the topbar, only while the list is showing */}
+      {topbarActions &&
+        !isFormOpen &&
+        createPortal(
+          <button type="button" onClick={openAddForm} aria-label="Add Class" className={addButtonClassName}>
+            <Icon name="Plus" size={16} />
+            {/* Icon only on phones, to save space */}
+            <span className="hidden sm:inline">Add Class</span>
+          </button>,
+          topbarActions,
+        )}
 
-        <FormActions
-          submitLabel={editingClass ? "Update" : "Add"}
-          isSubmitting={isSubmitting}
-          // Cancel only makes sense while editing
-          {...(editingClass && { onCancel: resetForm })}
+      {isFormOpen ? (
+        <FormContainer title={editingClass ? "Edit Class" : "Add Class"} onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-5">
+            <FormInput
+              name="name"
+              label="Name"
+              placeholder="e.g. Class 1"
+              register={register}
+              required
+              error={errors.name?.message}
+            />
+            <FormTextarea
+              name="description"
+              label="Description"
+              placeholder="Optional"
+              rows={3}
+              register={register}
+              error={errors.description?.message}
+            />
+          </div>
+
+          <FormActions
+            submitLabel={editingClass ? "Update" : "Add"}
+            isSubmitting={isSubmitting}
+            onCancel={closeForm}
+          />
+        </FormContainer>
+      ) : (
+        <List
+          items={classes}
+          getKey={(cls) => cls.id}
+          getSearchText={(cls) => `${cls.name} ${cls.description}`}
+          searchPlaceholder="Search classes..."
+          isLoading={isLoading}
+          emptyMessage="No classes yet. Click Add Class to create one."
+          columns={[
+            {
+              header: "Name",
+              render: (cls) => <span className="font-medium text-slate-900">{cls.name}</span>,
+              className: "whitespace-nowrap",
+            },
+            { header: "Description", render: (cls) => cls.description || "-" },
+            {
+              header: "Created",
+              render: (cls) => toDateString(new Date(cls.createdAt)),
+              className: "whitespace-nowrap",
+            },
+            {
+              header: "Actions",
+              className: "whitespace-nowrap text-right",
+              render: (cls) => (
+                <div className="flex justify-end gap-1">
+                  <button
+                    type="button"
+                    onClick={() => openEditForm(cls)}
+                    aria-label={`Edit ${cls.name}`}
+                    className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-600"
+                  >
+                    <Icon name="Pencil" size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(cls)}
+                    aria-label={`Delete ${cls.name}`}
+                    className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-red-600"
+                  >
+                    <Icon name="Trash2" size={16} />
+                  </button>
+                </div>
+              ),
+            },
+          ]}
         />
-      </FormContainer>
-
-      <List
-        items={classes}
-        getKey={(cls) => cls.id}
-        getSearchText={(cls) => `${cls.name} ${cls.description}`}
-        searchPlaceholder="Search classes..."
-        isLoading={isLoading}
-        emptyMessage="No classes yet. Add your first class above."
-        columns={[
-          {
-            header: "Name",
-            render: (cls) => <span className="font-medium text-slate-900">{cls.name}</span>,
-            className: "whitespace-nowrap",
-          },
-          { header: "Description", render: (cls) => cls.description || "-" },
-          {
-            header: "Created",
-            render: (cls) => toDateString(new Date(cls.createdAt)),
-            className: "whitespace-nowrap",
-          },
-          {
-            header: "Actions",
-            className: "whitespace-nowrap text-right",
-            render: (cls) => (
-              <div className="flex justify-end gap-1">
-                <button
-                  type="button"
-                  onClick={() => startEdit(cls)}
-                  aria-label={`Edit ${cls.name}`}
-                  className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-600"
-                >
-                  <Icon name="Pencil" size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(cls)}
-                  aria-label={`Delete ${cls.name}`}
-                  className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-red-600"
-                >
-                  <Icon name="Trash2" size={16} />
-                </button>
-              </div>
-            ),
-          },
-        ]}
-      />
-    </div>
+      )}
+    </>
   );
 };
 

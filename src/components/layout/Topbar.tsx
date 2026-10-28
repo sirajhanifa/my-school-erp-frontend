@@ -6,10 +6,11 @@ import ProfileMenu from "./ProfileMenu";
 
 interface TopbarProps {
   onMenuClick: () => void; // opens the sidebar on mobile
+  actionsRef: (element: HTMLDivElement | null) => void; // slot where pages put their buttons
 }
 
 // Bar at the top of every logged-in page: page title, notifications, profile
-const Topbar = ({ onMenuClick }: TopbarProps) => {
+const Topbar = ({ onMenuClick, actionsRef }: TopbarProps) => {
   const location = useLocation();
   const modules = useModuleStore((state) => state.modules);
 
@@ -36,6 +37,9 @@ const Topbar = ({ onMenuClick }: TopbarProps) => {
         <h1 className="min-w-0 flex-1 truncate text-lg font-semibold text-slate-900">
           {pageTitle}
         </h1>
+
+        {/* Page actions (e.g. "Add Class"); empty on pages that don't use it */}
+        <div ref={actionsRef} className="flex items-center gap-2" />
 
         <div className="flex items-center gap-1 sm:gap-2">
           <NotificationMenu />
