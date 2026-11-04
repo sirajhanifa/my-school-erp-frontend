@@ -12,6 +12,8 @@ function Card({
       data-size={size}
       className={cn(
         "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card py-(--card-spacing) text-sm text-card-foreground ring-1 ring-foreground/10 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
+        // Soft shadow on hover so cards feel interactive; the card never moves, so typing isn't disturbed.
+        "transition-shadow duration-200 hover:shadow-xl hover:shadow-slate-900/10 hover:ring-foreground/20 motion-reduce:transition-none",
         className
       )}
       {...props}
