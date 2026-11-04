@@ -1,6 +1,6 @@
 # MySchool ERP — Frontend
 
-React 19 + Vite 8 + TypeScript SPA for the school ERP. Tailwind CSS v4, React Router v7, Zustand, React Hook Form + Zod, axios, lucide-react. The API lives in `../my-school-erp-backend`.
+React 19 + Vite 8 + TypeScript SPA for the school ERP. Tailwind CSS v4, React Router v7, Zustand, React Hook Form + Zod, axios, lucide-react, shadcn/ui (Base UI). The API lives in `../my-school-erp-backend`.
 
 ## Commands
 
@@ -23,12 +23,14 @@ src/
   App.tsx              routes (BrowserRouter); calls checkAuth() on load
   modules/<area>/...   pages, grouped by feature (auth/login/LoginPage.tsx, dashboard/DashboardPage.tsx)
   components/
+    ui/                shadcn components (added via `npx shadcn@latest add <name>`)
     form/              shared form kit (see below)
     toast/Toaster.tsx  renders toasts from toastStore
     icon/Icon.tsx      <Icon name="User" /> — any lucide-react icon by name
     ProtectedRoute.tsx wrap pages that need login
   store/               Zustand stores (authStore, toastStore, moduleStore, classStore)
   schemas/             Zod schemas + inferred form types
+  lib/utils.ts         cn() class-name helper (used by shadcn components)
   utils/
 ```
 
@@ -38,11 +40,12 @@ src/
 - **Forms**: React Hook Form with `zodResolver(schema)`. Put the schema in `src/schemas/<name>Schema.ts` and export `type XFormValues = z.infer<typeof xSchema>`. Validation rules live in the Zod schema; the `required` prop on form components only shows the `*` marker.
 - **Use the form kit** in `components/form/` instead of raw inputs: `FormContainer`, `FormSection`, `FormInput`, `FormSelect`, `FormAutocomplete`, `FormCheckbox`, `FormDatePicker`, `FormTextarea`, `FormActions`, `Spinner`. Shared input styling is in `formStyles.ts` — change the look there, not per component. Components are generic over the form type and take `register` + `error`.
 - **Lists**: use `components/list/List.tsx` for list pages — pass `items`, `columns` (`{ header, render, className? }`), `getKey` and `getSearchText`. Search and pagination run in the browser on the loaded items.
-- **Toasts**: `import { toast } from ".../store/toastStore"` (relative path; there is no `src` alias) → `toast.success(...)`, `toast.error(...)`. Works outside React too.
+- **Toasts**: `import { toast } from ".../store/toastStore"` (or `@/store/toastStore` — `@/` maps to `src/`) → `toast.success(...)`, `toast.error(...)`. Works outside React too.
 - **State**: Zustand stores with `create<State>()((set) => ({ ... }))`; select single fields: `useAuthStore((s) => s.user)`.
 - **API calls live in stores, not in page components** (see `classStore`): the store calls the API, updates its state, shows the toast, and returns `true`/`false` so the page can react (e.g. clear its form).
 - **Router**: import from `"react-router"` (v7), not `react-router-dom`.
-- Styling is Tailwind utility classes with the slate palette and blue accents; no CSS modules or component library.
+- Styling is Tailwind utility classes with the slate palette and blue accents; no CSS modules.
+- **shadcn/ui**: generated components live in `src/components/ui/` (import as `@/components/ui/button`). Theme colors are CSS variables in `src/index.css` (`:root` / `.dark`). Don't put our own components in `ui/`.
 - Local imports have no file extension (bundler resolution). Components are default-exported arrow functions (form-kit components are generic `function`s).
 - Comments are plain-English and explain *why* (the codebase is written to be readable by learners). Keep that style.
 - Keep comments simple and clear: one or two lines maximum. Avoid long explanations in comments.
