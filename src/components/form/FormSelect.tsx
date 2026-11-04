@@ -1,8 +1,8 @@
 import { useId } from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import FormField from "./FormField";
-import { getInputClassName } from "./formStyles";
 import type { SelectOption } from "./types";
 
 type FormSelectProps<T extends FieldValues> = {
@@ -30,6 +30,9 @@ function FormSelect<T extends FieldValues>({
 }: FormSelectProps<T>) {
   const id = useId();
 
+  // The "null" item is what the trigger shows when nothing is picked yet
+  const items = [{ label: placeholder, value: null }, ...options];
+
   return (
     <Controller
       name={name}
@@ -40,24 +43,32 @@ function FormSelect<T extends FieldValues>({
 
         return (
           <FormField id={id} label={label} required={required} error={error} className={className}>
-            <select
-              id={id}
-              {...field}
-              value={field.value ?? ""}
-              aria-required={required}
-              aria-invalid={!!error}
-              aria-describedby={error ? `${id}-error` : undefined}
-              className={getInputClassName(!!error)}
+            {/* The form stores "" for "nothing picked"; the Select uses null for that */}
+            <Select
+              items={items}
+              value={field.value || null}
+              onValueChange={(value) => field.onChange(value ?? "")}
+              disabled={field.disabled}
             >
-              <option value="" disabled>
-                {placeholder}
-              </option>
-              {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                id={id}
+                ref={field.ref}
+                onBlur={field.onBlur}
+                aria-required={required}
+                aria-invalid={!!error}
+                aria-describedby={error ? `${id}-error` : undefined}
+                className="w-full data-[size=default]:h-9"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </FormField>
         );
       }}

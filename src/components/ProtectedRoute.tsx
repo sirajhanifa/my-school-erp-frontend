@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Navigate } from "react-router";
-import Spinner from "./form/Spinner";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuthStore } from "../store/authStore";
 
 type ProtectedRouteProps = {
@@ -15,8 +15,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Wait until we know whether the user is logged in (e.g. right after a page refresh).
   if (isCheckingAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-slate-500">
-        <Spinner className="h-6 w-6" />
+      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+        <Spinner className="size-6" />
       </div>
     );
   }

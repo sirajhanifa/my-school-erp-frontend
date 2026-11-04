@@ -1,9 +1,18 @@
-import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Icon from "../icon/Icon";
 import { useAuthStore } from "../../store/authStore";
 import { toast } from "../../store/toastStore";
-import useClickOutside from "./useClickOutside";
 
 // "Ravi Kumar" -> "RK", "Admin" -> "A"
 const getInitials = (name: string) =>
@@ -14,19 +23,14 @@ const getInitials = (name: string) =>
     .map((part) => part[0].toUpperCase())
     .join("");
 
-// Avatar button with the logged-in user's details and a Logout option
+// Avatar button with the logged-in user's details and a Logout option.
+// The dropdown handles opening, closing on outside click/Escape and keyboard use.
 const ProfileMenu = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => setIsOpen(false), []);
-  useClickOutside(containerRef, close, isOpen);
-
   const handleLogout = async () => {
-    setIsOpen(false);
     await logout();
     toast.info("You have been logged out");
     navigate("/login", { replace: true });
@@ -35,54 +39,42 @@ const ProfileMenu = () => {
   if (!user) return null;
 
   return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setIsOpen((open) => !open)}
-        aria-expanded={isOpen}
-        aria-label="Open profile menu"
-        className="flex items-center gap-2 rounded-md p-1 hover:bg-slate-100 sm:pr-2"
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={<Button variant="ghost" aria-label="Open profile menu" className="h-auto gap-2 p-1 sm:pr-2" />}
       >
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white">
-          {getInitials(user.name)}
-        </span>
+        <Avatar>
+          <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
+            {getInitials(user.name)}
+          </AvatarFallback>
+        </Avatar>
         {/* Name and role are hidden on small screens to save space */}
         <span className="hidden text-left sm:block">
-          <span className="block text-sm leading-tight font-medium text-slate-900">{user.name}</span>
-          <span className="block text-xs leading-tight text-slate-500">{user.role}</span>
+          <span className="block text-sm leading-tight font-medium">{user.name}</span>
+          <span className="block text-xs leading-tight font-normal text-muted-foreground">{user.role}</span>
         </span>
-        <Icon name="ChevronDown" size={16} className="hidden text-slate-400 sm:block" />
-      </button>
+        <Icon name="ChevronDown" size={16} className="hidden text-muted-foreground sm:block" />
+      </DropdownMenuTrigger>
 
-      {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg">
-          <div className="border-b border-slate-100 px-4 py-3">
-            <p className="truncate text-sm font-medium text-slate-900">{user.name}</p>
-            <p className="truncate text-xs text-slate-500">{user.email}</p>
-          </div>
-
-          <div className="py-1">
-            {/* Disabled until a profile page exists */}
-            <button
-              type="button"
-              disabled
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-400"
-            >
-              <Icon name="User" size={16} />
-              My Profile
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-            >
-              <Icon name="LogOut" size={16} />
-              Logout
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="py-1.5">
+            <span className="block truncate text-sm font-medium text-foreground">{user.name}</span>
+            <span className="block truncate font-normal">{user.email}</span>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        {/* Disabled until a profile page exists */}
+        <DropdownMenuItem disabled>
+          <Icon name="User" size={16} />
+          My Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+          <Icon name="LogOut" size={16} />
+          Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { FieldDescription, FieldLegend, FieldSet } from "@/components/ui/field";
 
 type FormSectionColumns = 1 | 2 | 3;
 
@@ -20,14 +21,12 @@ const columnClassNames: Record<FormSectionColumns, string> = {
 // To make one field span the full row, pass className="md:col-span-2" to that field.
 const FormSection = ({ title, description, columns = 2, children }: FormSectionProps) => {
   return (
-    <section className="border-t border-slate-200 pt-8 first:border-t-0 first:pt-0">
-      <div className="mb-5">
-        <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-        {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
-      </div>
+    <FieldSet className="border-t pt-8 first:border-t-0 first:pt-0">
+      <FieldLegend className="font-semibold">{title}</FieldLegend>
+      {description && <FieldDescription>{description}</FieldDescription>}
 
       <div className={`grid grid-cols-1 gap-x-6 gap-y-5 ${columnClassNames[columns]}`}>{children}</div>
-    </section>
+    </FieldSet>
   );
 };
 

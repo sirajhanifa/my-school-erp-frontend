@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Navigate, useNavigate } from "react-router";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import FormContainer from "../../../components/form/FormContainer";
 import FormInput from "../../../components/form/FormInput";
 import FormActions from "../../../components/form/FormActions";
@@ -50,9 +51,9 @@ const LoginPage = () => {
         <FormContainer title="Login" size="sm" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-5">
             {error && (
-              <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                {error}
-              </p>
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
             <FormInput

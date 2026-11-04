@@ -1,4 +1,5 @@
-import Spinner from "./Spinner";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 type FormActionsProps = {
   submitLabel?: string;
@@ -13,31 +14,8 @@ type FormActionsProps = {
   fullWidth?: boolean;
 };
 
-// Shared by all buttons: same height, shape and text, so they line up in the row.
-// "enabled:" = hover and press effects only apply when the button can be clicked.
-const buttonBaseClassName =
-  "inline-flex h-10 min-w-24 items-center justify-center gap-2 rounded-lg px-5 text-sm font-bold " +
-  "transition duration-150 ease-in-out enabled:active:scale-[0.98] " +
-  // Focus ring only for keyboard users (not on mouse click)
-  "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 " +
-  "disabled:cursor-not-allowed disabled:opacity-60";
-
-// Submit: the main action, solid blue
-const primaryButtonClassName =
-  `${buttonBaseClassName} bg-blue-600 text-white shadow-sm ` +
-  "enabled:hover:bg-blue-700 enabled:hover:shadow-md focus-visible:ring-blue-500";
-
-// Save: a secondary action, white with a border
-const secondaryButtonClassName =
-  `${buttonBaseClassName} border border-slate-300 bg-white text-slate-700 shadow-xs ` +
-  "enabled:hover:border-slate-400 enabled:hover:bg-slate-50 focus-visible:ring-blue-500";
-
-// Cancel: the least important action, text only
-const ghostButtonClassName =
-  `${buttonBaseClassName} text-slate-600 ` +
-  "enabled:hover:bg-slate-100 enabled:hover:text-slate-900 focus-visible:ring-slate-400";
-
 // The row of buttons at the bottom of every form: Cancel, Save and Submit.
+// Submit = solid blue (main action), Save = outline, Cancel = text only.
 const FormActions = ({
   submitLabel = "Submit",
   saveLabel = "Save",
@@ -55,24 +33,24 @@ const FormActions = ({
   return (
     // Phones: full-width buttons stacked with Submit on top.
     // From "sm" up: one row aligned to the right.
-    <div className={`flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 ${rowLayoutClassName}`}>
+    <div className={`flex flex-col-reverse gap-3 border-t pt-6 ${rowLayoutClassName}`}>
       {onCancel && (
-        <button type="button" onClick={onCancel} disabled={isSubmitting} className={ghostButtonClassName}>
+        <Button type="button" variant="ghost" size="lg" onClick={onCancel} disabled={isSubmitting} className="min-w-24">
           {cancelLabel}
-        </button>
+        </Button>
       )}
 
       {onSave && (
-        <button type="button" onClick={onSave} disabled={isDisabled} className={secondaryButtonClassName}>
+        <Button type="button" variant="outline" size="lg" onClick={onSave} disabled={isDisabled} className="min-w-24">
           {saveLabel}
-        </button>
+        </Button>
       )}
 
       {/* aria-busy tells screen readers the form is being submitted */}
-      <button type="submit" disabled={isDisabled} aria-busy={isSubmitting} className={primaryButtonClassName}>
+      <Button type="submit" size="lg" disabled={isDisabled} aria-busy={isSubmitting} className="min-w-24">
         {isSubmitting && <Spinner />}
         {isSubmitting ? "Please wait..." : submitLabel}
-      </button>
+      </Button>
     </div>
   );
 };

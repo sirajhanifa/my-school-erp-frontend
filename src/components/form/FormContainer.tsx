@@ -1,4 +1,5 @@
 import type { FormEventHandler, ReactNode } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type FormContainerSize = "sm" | "md" | "lg" | "xl" | "full";
 
@@ -18,25 +19,25 @@ const sizeClassNames: Record<FormContainerSize, string> = {
   full: "max-w-none",
 };
 
-// The white "card" that wraps a whole form: background, border, shadow, width and spacing.
+// The card that wraps a whole form: background, border, width and spacing.
 // It knows nothing about the fields inside it.
 const FormContainer = ({ title, description, size = "lg", onSubmit, children }: FormContainerProps) => {
   return (
-    <div
-      className={`mx-auto w-full ${sizeClassNames[size]} rounded-xl border border-slate-200 bg-white shadow-sm`}
-    >
+    <Card className={`mx-auto w-full gap-0 py-0 ${sizeClassNames[size]}`}>
       {(title || description) && (
-        <div className="border-b border-slate-200 px-4 py-5 sm:px-8">
-          {title && <h2 className="text-lg font-semibold text-slate-900">{title}</h2>}
-          {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
-        </div>
+        <CardHeader className="border-b px-4 py-5 sm:px-8">
+          {title && <CardTitle className="text-lg font-semibold">{title}</CardTitle>}
+          {description && <CardDescription>{description}</CardDescription>}
+        </CardHeader>
       )}
 
-      {/* noValidate: validation is handled by Zod, not the browser's built-in popups */}
-      <form onSubmit={onSubmit} noValidate className="space-y-8 px-4 py-6 sm:px-8">
-        {children}
-      </form>
-    </div>
+      <CardContent className="px-4 py-6 sm:px-8">
+        {/* noValidate: validation is handled by Zod, not the browser's built-in popups */}
+        <form onSubmit={onSubmit} noValidate className="space-y-8">
+          {children}
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

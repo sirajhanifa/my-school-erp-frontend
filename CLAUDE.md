@@ -38,14 +38,15 @@ src/
 
 - **Pages**: add under `src/modules/<feature>/`, register in `App.tsx`, wrap in `<ProtectedRoute>` unless public.
 - **Forms**: React Hook Form with `zodResolver(schema)`. Put the schema in `src/schemas/<name>Schema.ts` and export `type XFormValues = z.infer<typeof xSchema>`. Validation rules live in the Zod schema; the `required` prop on form components only shows the `*` marker.
-- **Use the form kit** in `components/form/` instead of raw inputs: `FormContainer`, `FormSection`, `FormInput`, `FormSelect`, `FormAutocomplete`, `FormCheckbox`, `FormDatePicker`, `FormTextarea`, `FormActions`, `Spinner`. Shared input styling is in `formStyles.ts` — change the look there, not per component. Components are generic over the form type and take `register` + `error`.
+- **Use the form kit** in `components/form/` instead of raw inputs: `FormContainer`, `FormSection`, `FormInput`, `FormSelect`, `FormAutocomplete`, `FormCheckbox`, `FormDatePicker`, `FormTextarea`, `FormActions`. They wrap shadcn components (Field, Input, Select, Combobox, Calendar, Card, Button) and keep a simple props API. Components are generic over the form type: `FormInput`/`FormTextarea` take `register` + `error`; `FormSelect`, `FormAutocomplete`, `FormCheckbox`, `FormDatePicker` take `control`.
 - **Lists**: use `components/list/List.tsx` for list pages — pass `items`, `columns` (`{ header, render, className? }`), `getKey` and `getSearchText`. Search and pagination run in the browser on the loaded items.
 - **Toasts**: `import { toast } from ".../store/toastStore"` (or `@/store/toastStore` — `@/` maps to `src/`) → `toast.success(...)`, `toast.error(...)`. Works outside React too.
 - **State**: Zustand stores with `create<State>()((set) => ({ ... }))`; select single fields: `useAuthStore((s) => s.user)`.
 - **API calls live in stores, not in page components** (see `classStore`): the store calls the API, updates its state, shows the toast, and returns `true`/`false` so the page can react (e.g. clear its form).
 - **Router**: import from `"react-router"` (v7), not `react-router-dom`.
 - Styling is Tailwind utility classes with the slate palette and blue accents; no CSS modules.
-- **shadcn/ui**: generated components live in `src/components/ui/` (import as `@/components/ui/button`). Theme colors are CSS variables in `src/index.css` (`:root` / `.dark`). Don't put our own components in `ui/`.
+- **shadcn/ui**: generated components live in `src/components/ui/` (import as `@/components/ui/button`). Theme colors are CSS variables in `src/index.css` (`:root` / `.dark`); `--primary` is our blue. Use theme classes (`text-muted-foreground`, `bg-primary`, `text-destructive`) in new code. Don't put our own components in `ui/`. Use shadcn's `Button`, `Spinner`, `DropdownMenu` etc. instead of hand-built ones.
+- Not on shadcn (by choice): `toast/Toaster.tsx` (custom toast with countdown bar) and `layout/Sidebar.tsx`.
 - Local imports have no file extension (bundler resolution). Components are default-exported arrow functions (form-kit components are generic `function`s).
 - Comments are plain-English and explain *why* (the codebase is written to be readable by learners). Keep that style.
 - Keep comments simple and clear: one or two lines maximum. Avoid long explanations in comments.

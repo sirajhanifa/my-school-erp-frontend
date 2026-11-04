@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
 type FormFieldProps = {
   id: string;
@@ -13,24 +14,21 @@ type FormFieldProps = {
 // Used internally by the form field components so they all share the same layout.
 const FormField = ({ id, label, required, error, className, children }: FormFieldProps) => {
   return (
-    <div className={`flex flex-col gap-1.5 ${className ?? ""}`}>
-      <label htmlFor={id} className="text-sm font-medium text-slate-700">
+    // data-invalid turns the label red when there is an error
+    <Field data-invalid={!!error} className={className}>
+      <FieldLabel htmlFor={id}>
         {label}
         {required && (
-          <span className="ml-0.5 text-red-600" aria-hidden="true">
+          <span className="-ml-1.5 text-destructive" aria-hidden="true">
             *
           </span>
         )}
-      </label>
+      </FieldLabel>
 
       {children}
 
-      {error && (
-        <p id={`${id}-error`} className="text-xs text-red-600">
-          {error}
-        </p>
-      )}
-    </div>
+      {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
+    </Field>
   );
 };
 

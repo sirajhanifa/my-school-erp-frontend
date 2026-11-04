@@ -1,7 +1,7 @@
 import { useId } from "react";
 import type { FieldValues, Path, UseFormRegister } from "react-hook-form";
+import { Input } from "@/components/ui/input";
 import FormField from "./FormField";
-import { getInputClassName } from "./formStyles";
 
 type FormInputType = "text" | "email" | "password" | "number" | "tel" | "url";
 
@@ -33,14 +33,14 @@ function FormInput<T extends FieldValues>({
 
   return (
     <FormField id={id} label={label} required={required} error={error} className={className}>
-      <input
+      <Input
         id={id}
         type={type}
         placeholder={placeholder}
         aria-required={required}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={getInputClassName(!!error)}
+        className="h-9"
         {...register(name, { disabled, valueAsNumber: type === "number" })}
       />
     </FormField>

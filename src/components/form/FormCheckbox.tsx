@@ -1,60 +1,67 @@
 import { useId } from "react";
-import type { FieldValues, Path, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
+import type { Control, FieldValues, Path } from "react-hook-form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldContent, FieldError, FieldLabel } from "@/components/ui/field";
 
 type FormCheckboxProps<T extends FieldValues> = {
   name: Path<T>;
   label: string;
-  register: UseFormRegister<T>;
+  control: Control<T>;
   required?: boolean;
   disabled?: boolean;
-  error?: string;
   className?: string;
 };
 
 // A single checkbox. The form value is true/false.
 // The label sits next to the box, so this does not use FormField.
+// Takes "control" (not "register") because the shadcn checkbox is not a native <input>.
 function FormCheckbox<T extends FieldValues>({
   name,
   label,
-  register,
+  control,
   required,
   disabled,
-  error,
   className,
 }: FormCheckboxProps<T>) {
   const id = useId();
 
   return (
-    <div className={`flex flex-col gap-1.5 ${className ?? ""}`}>
-      <div className="flex items-center gap-2">
-        <input
-          id={id}
-          type="checkbox"
-          aria-required={required}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${id}-error` : undefined}
-          className="h-4 w-4 rounded border-slate-300 accent-blue-600 disabled:cursor-not-allowed"
-          {...register(name, { disabled })}
-        />
-        <label
-          htmlFor={id}
-          className={`text-sm ${disabled ? "cursor-not-allowed text-slate-400" : "text-slate-700"}`}
-        >
-          {label}
-          {required && (
-            <span className="ml-0.5 text-red-600" aria-hidden="true">
-              *
-            </span>
-          )}
-        </label>
-      </div>
+    <Controller
+      name={name}
+      control={control}
+      disabled={disabled}
+      render={({ field, fieldState }) => {
+        const error = fieldState.error?.message;
 
-      {error && (
-        <p id={`${id}-error`} className="text-xs text-red-600">
-          {error}
-        </p>
-      )}
-    </div>
+        return (
+          <Field orientation="horizontal" data-invalid={!!error} className={className}>
+            <Checkbox
+              id={id}
+              inputRef={field.ref}
+              checked={!!field.value}
+              onCheckedChange={(checked) => field.onChange(checked)}
+              onBlur={field.onBlur}
+              disabled={field.disabled}
+              aria-required={required}
+              aria-invalid={!!error}
+              aria-describedby={error ? `${id}-error` : undefined}
+            />
+            <FieldContent>
+              <FieldLabel htmlFor={id} className="font-normal">
+                {label}
+                {required && (
+                  <span className="-ml-1.5 text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                )}
+              </FieldLabel>
+              {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
+            </FieldContent>
+          </Field>
+        );
+      }}
+    />
   );
 }
 

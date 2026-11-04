@@ -1,7 +1,7 @@
 import { useId } from "react";
 import type { FieldValues, Path, UseFormRegister } from "react-hook-form";
+import { Textarea } from "@/components/ui/textarea";
 import FormField from "./FormField";
-import { getInputClassName } from "./formStyles";
 
 type FormTextareaProps<T extends FieldValues> = {
   name: Path<T>;
@@ -30,14 +30,14 @@ function FormTextarea<T extends FieldValues>({
 
   return (
     <FormField id={id} label={label} required={required} error={error} className={className}>
-      <textarea
+      <Textarea
         id={id}
         rows={rows}
         placeholder={placeholder}
         aria-required={required}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={`${getInputClassName(!!error)} resize-y`}
+        className="resize-y"
         {...register(name, { disabled })}
       />
     </FormField>

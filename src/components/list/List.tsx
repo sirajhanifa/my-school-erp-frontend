@@ -1,7 +1,10 @@
 import { useId, useState } from "react";
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Icon from "../icon/Icon";
-import Spinner from "../form/Spinner";
 
 // One column of the list: its heading and how to show an item in it
 export type ListColumn<T> = {
@@ -25,14 +28,8 @@ type ListProps<T> = {
 // How many page-number buttons to show at most
 const MAX_PAGE_BUTTONS = 5;
 
-const pageButtonBaseClassName =
-  "inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium " +
-  "transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 " +
-  "disabled:cursor-not-allowed disabled:opacity-50";
-
-const pageButtonClassName = `${pageButtonBaseClassName} border border-slate-300 bg-white text-slate-700 enabled:hover:bg-slate-50`;
-
-const currentPageButtonClassName = `${pageButtonBaseClassName} border border-blue-600 bg-blue-600 text-white`;
+// How many grey placeholder rows to show while loading
+const SKELETON_ROWS = 5;
 
 // Same side padding everywhere, so search, headers, cells and footer line up
 const cellPaddingClassName = "px-4 sm:px-6";
@@ -80,140 +77,131 @@ function List<T>({
 
   return (
     // overflow-hidden: keeps the grey header inside the rounded corners
-    <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="w-full overflow-hidden rounded-xl border bg-card shadow-sm">
       {/* Search box */}
-      <div className={`border-b border-slate-200 py-4 ${cellPaddingClassName}`}>
+      <div className={`border-b py-4 ${cellPaddingClassName}`}>
         <label htmlFor={searchId} className="sr-only">
           Search
         </label>
-        <div className="relative w-full sm:max-w-xs">
-          <Icon
-            name="Search"
-            size={16}
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
-          />
-          <input
+        <InputGroup className="h-9 w-full sm:max-w-xs">
+          <InputGroupAddon>
+            <Icon name="Search" size={16} />
+          </InputGroupAddon>
+          <InputGroupInput
             id={searchId}
             type="search"
             value={search}
             onChange={(event) => handleSearchChange(event.target.value)}
             placeholder={searchPlaceholder}
-            className="block w-full rounded-lg border border-slate-300 bg-white py-2 pr-3 pl-9 text-sm text-slate-900 shadow-xs placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
           />
-        </div>
+        </InputGroup>
       </div>
 
-      {/* Table. overflow-x-auto: scrolls sideways on small screens */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs font-medium tracking-wider whitespace-nowrap text-slate-500 uppercase">
-            <tr>
-              {columns.map((column) => (
-                <th
-                  key={column.header}
-                  scope="col"
-                  className={`py-3 ${cellPaddingClassName} ${column.className ?? ""}`}
-                >
-                  {column.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
-            {isLoading && (
-              <tr>
-                <td colSpan={columns.length} className="py-12">
-                  <div className="flex justify-center text-slate-500">
-                    <Spinner className="h-5 w-5" />
-                  </div>
-                </td>
-              </tr>
-            )}
+      <Table>
+        <TableHeader className="bg-muted/50">
+          <TableRow className="hover:bg-transparent">
+            {columns.map((column) => (
+              <TableHead
+                key={column.header}
+                className={`h-10 text-xs tracking-wider text-muted-foreground uppercase ${cellPaddingClassName} ${column.className ?? ""}`}
+              >
+                {column.header}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {/* Loading: grey placeholder rows in the shape of the table */}
+          {isLoading &&
+            Array.from({ length: SKELETON_ROWS }, (_, row) => (
+              <TableRow key={row} className="hover:bg-transparent">
+                {columns.map((column) => (
+                  <TableCell key={column.header} className={`py-3.5 ${cellPaddingClassName}`}>
+                    <Skeleton className="h-4 w-full max-w-40" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
 
-            {/* Nothing to show: either no data at all, or nothing matches the search */}
-            {!isLoading && pageItems.length === 0 && (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className={`py-12 text-center text-slate-500 ${cellPaddingClassName}`}
-                >
-                  {items.length === 0 ? emptyMessage : `No results for "${search.trim()}"`}
-                </td>
-              </tr>
-            )}
+          {/* Nothing to show: either no data at all, or nothing matches the search */}
+          {!isLoading && pageItems.length === 0 && (
+            <TableRow className="hover:bg-transparent">
+              <TableCell
+                colSpan={columns.length}
+                className={`py-12 text-center whitespace-normal text-muted-foreground ${cellPaddingClassName}`}
+              >
+                {items.length === 0 ? emptyMessage : `No results for "${search.trim()}"`}
+              </TableCell>
+            </TableRow>
+          )}
 
-            {!isLoading &&
-              pageItems.map((item) => (
-                <tr
-                  key={getKey(item)}
-                  className="transition-colors duration-150 hover:bg-slate-50/80"
-                >
-                  {columns.map((column) => (
-                    <td
-                      key={column.header}
-                      className={`py-3.5 align-middle ${cellPaddingClassName} ${column.className ?? ""}`}
-                    >
-                      {column.render(item)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
+          {!isLoading &&
+            pageItems.map((item) => (
+              <TableRow key={getKey(item)}>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.header}
+                    className={`py-3.5 whitespace-normal ${cellPaddingClassName} ${column.className ?? ""}`}
+                  >
+                    {column.render(item)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
 
       {/* Pagination: only shown when there is something to page through */}
       {!isLoading && filteredItems.length > 0 && (
         <div
-          className={`flex flex-col items-center gap-3 border-t border-slate-200 py-3 sm:flex-row sm:justify-between ${cellPaddingClassName}`}
+          className={`flex flex-col items-center gap-3 border-t py-3 sm:flex-row sm:justify-between ${cellPaddingClassName}`}
         >
-          <p className="text-sm text-slate-600">
-            Showing <span className="font-medium">{startIndex + 1}</span>–
-            <span className="font-medium">{startIndex + pageItems.length}</span> of{" "}
-            <span className="font-medium">{filteredItems.length}</span>
+          <p className="text-sm text-muted-foreground">
+            Showing <span className="font-medium text-foreground">{startIndex + 1}</span>–
+            <span className="font-medium text-foreground">{startIndex + pageItems.length}</span> of{" "}
+            <span className="font-medium text-foreground">{filteredItems.length}</span>
           </p>
 
           {totalPages > 1 && (
             <nav aria-label="Pagination" className="flex items-center gap-1">
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={() => setPage(currentPage - 1)}
                 disabled={currentPage === 1}
                 aria-label="Previous page"
-                className={pageButtonClassName}
               >
                 <Icon name="ChevronLeft" size={16} />
-              </button>
+              </Button>
 
               {/* Page numbers on tablets and desktops */}
               {pageNumbers.map((number) => (
-                <button
+                <Button
                   key={number}
-                  type="button"
+                  variant={number === currentPage ? "default" : "outline"}
+                  size="icon"
                   onClick={() => setPage(number)}
                   aria-current={number === currentPage ? "page" : undefined}
-                  className={`hidden sm:inline-flex ${
-                    number === currentPage ? currentPageButtonClassName : pageButtonClassName
-                  }`}
+                  className="hidden sm:inline-flex"
                 >
                   {number}
-                </button>
+                </Button>
               ))}
 
               {/* Short version on phones, to save space */}
-              <span className="px-2 text-sm text-slate-600 sm:hidden">
+              <span className="px-2 text-sm text-muted-foreground sm:hidden">
                 Page {currentPage} of {totalPages}
               </span>
 
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={() => setPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 aria-label="Next page"
-                className={pageButtonClassName}
               >
                 <Icon name="ChevronRight" size={16} />
-              </button>
+              </Button>
             </nav>
           )}
         </div>
