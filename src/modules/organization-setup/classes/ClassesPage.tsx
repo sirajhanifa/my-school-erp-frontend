@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import FormContainer from "../../../components/form/FormContainer";
 import FormInput from "../../../components/form/FormInput";
+import FormSection from "../../../components/form/FormSection";
 import FormTextarea from "../../../components/form/FormTextarea";
 import FormActions from "../../../components/form/FormActions";
 import Icon from "../../../components/icon/Icon";
@@ -98,8 +99,14 @@ const ClassesPage = () => {
         )}
 
       {isFormOpen ? (
-        <FormContainer title={editingClass ? "Edit Class" : "Add Class"} onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-5">
+        // size="full": the form fills the content area instead of a narrow centred card
+        <FormContainer
+          title={editingClass ? "Edit Class" : "Add Class"}
+          size="full"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          {/* 2 columns from md up: Name on the left, Description across the full row */}
+          <FormSection title="Class Details" description="Basic information about the class." columns={2}>
             <FormInput
               name="name"
               label="Name"
@@ -112,11 +119,12 @@ const ClassesPage = () => {
               name="description"
               label="Description"
               placeholder="Optional"
-              rows={3}
+              rows={6}
               register={register}
               error={errors.description?.message}
+              className="md:col-span-2"
             />
-          </div>
+          </FormSection>
 
           <FormActions
             submitLabel={editingClass ? "Update" : "Add"}

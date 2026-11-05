@@ -76,14 +76,36 @@ function List<T>({
   };
 
   return (
-    // overflow-hidden: keeps the grey header inside the rounded corners
-    <div className="w-full overflow-hidden rounded-xl border bg-card shadow-sm">
-      {/* Search box */}
-      <div className={`border-b py-4 ${cellPaddingClassName}`}>
+    // overflow-hidden: keeps the grey header inside the rounded corners.
+    // Same soft hover shadow as Card, so lists and forms feel alike.
+    <div className="w-full overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow duration-200 hover:shadow-xl hover:shadow-slate-900/10 motion-reduce:transition-none">
+      {/* Toolbar: record count on the left, search on the right (stacked on phones) */}
+      <div
+        className={`flex flex-col gap-3 border-b py-4 sm:flex-row sm:items-center sm:justify-between ${cellPaddingClassName}`}
+      >
+        {isLoading ? (
+          <Skeleton className="h-4 w-24" />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {/* While searching, show how many of all records match */}
+            {searchText ? (
+              <>
+                <span className="font-semibold text-foreground">{filteredItems.length}</span> of {items.length}{" "}
+                records
+              </>
+            ) : (
+              <>
+                <span className="font-semibold text-foreground">{items.length}</span>{" "}
+                {items.length === 1 ? "record" : "records"}
+              </>
+            )}
+          </p>
+        )}
+
         <label htmlFor={searchId} className="sr-only">
           Search
         </label>
-        <InputGroup className="h-9 w-full sm:max-w-xs">
+        <InputGroup className="h-9 w-full sm:w-72">
           <InputGroupAddon>
             <Icon name="Search" size={16} />
           </InputGroupAddon>
@@ -98,12 +120,12 @@ function List<T>({
       </div>
 
       <Table>
-        <TableHeader className="bg-muted/50">
+        <TableHeader className="bg-muted/60">
           <TableRow className="hover:bg-transparent">
             {columns.map((column) => (
               <TableHead
                 key={column.header}
-                className={`h-10 text-xs tracking-wider text-muted-foreground uppercase ${cellPaddingClassName} ${column.className ?? ""}`}
+                className={`h-11 text-xs font-semibold tracking-wide text-muted-foreground uppercase ${cellPaddingClassName} ${column.className ?? ""}`}
               >
                 {column.header}
               </TableHead>
@@ -137,11 +159,15 @@ function List<T>({
 
           {!isLoading &&
             pageItems.map((item) => (
-              <TableRow key={getKey(item)}>
+              // Light grey on hover, like the sidebar rows
+              <TableRow
+                key={getKey(item)}
+                className="transition-colors duration-150 hover:bg-muted/40 motion-reduce:transition-none"
+              >
                 {columns.map((column) => (
                   <TableCell
                     key={column.header}
-                    className={`py-3.5 whitespace-normal ${cellPaddingClassName} ${column.className ?? ""}`}
+                    className={`py-3.5 whitespace-normal text-foreground ${cellPaddingClassName} ${column.className ?? ""}`}
                   >
                     {column.render(item)}
                   </TableCell>
@@ -154,7 +180,7 @@ function List<T>({
       {/* Pagination: only shown when there is something to page through */}
       {!isLoading && filteredItems.length > 0 && (
         <div
-          className={`flex flex-col items-center gap-3 border-t py-3 sm:flex-row sm:justify-between ${cellPaddingClassName}`}
+          className={`flex flex-col items-center gap-3 border-t bg-muted/30 py-3 sm:flex-row sm:justify-between ${cellPaddingClassName}`}
         >
           <p className="text-sm text-muted-foreground">
             Showing <span className="font-medium text-foreground">{startIndex + 1}</span>–
@@ -166,7 +192,7 @@ function List<T>({
             <nav aria-label="Pagination" className="flex items-center gap-1">
               <Button
                 variant="outline"
-                size="icon"
+                size="icon-sm"
                 onClick={() => setPage(currentPage - 1)}
                 disabled={currentPage === 1}
                 aria-label="Previous page"
@@ -179,7 +205,7 @@ function List<T>({
                 <Button
                   key={number}
                   variant={number === currentPage ? "default" : "outline"}
-                  size="icon"
+                  size="icon-sm"
                   onClick={() => setPage(number)}
                   aria-current={number === currentPage ? "page" : undefined}
                   className="hidden sm:inline-flex"
@@ -195,7 +221,7 @@ function List<T>({
 
               <Button
                 variant="outline"
-                size="icon"
+                size="icon-sm"
                 onClick={() => setPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 aria-label="Next page"
