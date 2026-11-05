@@ -4,11 +4,18 @@ import { useForm } from "react-hook-form";
 import { useOutletContext } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import FormContainer from "../../../components/form/FormContainer";
-import FormInput from "../../../components/form/FormInput";
-import FormSection from "../../../components/form/FormSection";
-import FormTextarea from "../../../components/form/FormTextarea";
-import FormActions from "../../../components/form/FormActions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
 import type { AppLayoutContext } from "../../../components/layout/AppLayout";
@@ -99,39 +106,86 @@ const ClassesPage = () => {
         )}
 
       {isFormOpen ? (
-        // size="full": the form fills the content area instead of a narrow centred card
-        <FormContainer
-          title={editingClass ? "Edit Class" : "Add Class"}
-          size="full"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          {/* 2 columns from md up: Name on the left, Description across the full row */}
-          <FormSection title="Class Details" description="Basic information about the class." columns={2}>
-            <FormInput
-              name="name"
-              label="Name"
-              placeholder="e.g. Class 1"
-              register={register}
-              required
-              error={errors.name?.message}
-            />
-            <FormTextarea
-              name="description"
-              label="Description"
-              placeholder="Optional"
-              rows={6}
-              register={register}
-              error={errors.description?.message}
-              className="md:col-span-2"
-            />
-          </FormSection>
+        // max-w-none: the form fills the content area instead of a narrow centred card
+        <Card className="mx-auto w-full max-w-none gap-0 py-0">
+          <CardHeader className="border-b px-4 py-5 sm:px-8">
+            <CardTitle className="text-lg font-semibold">{editingClass ? "Edit Class" : "Add Class"}</CardTitle>
+          </CardHeader>
 
-          <FormActions
-            submitLabel={editingClass ? "Update" : "Add"}
-            isSubmitting={isSubmitting}
-            onCancel={closeForm}
-          />
-        </FormContainer>
+          <CardContent className="px-4 py-6 sm:px-8">
+            {/* noValidate: validation is handled by Zod, not the browser's built-in popups */}
+            <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+              <FieldSet className="border-t pt-8 first:border-t-0 first:pt-0">
+                <FieldLegend className="font-semibold">Class Details</FieldLegend>
+                <FieldDescription>Basic information about the class.</FieldDescription>
+
+                {/* 2 columns from md up: Name on the left, Description across the full row */}
+                <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+                  {/* data-invalid turns the label red when there is an error */}
+                  <Field data-invalid={!!errors.name}>
+                    <FieldLabel htmlFor="class-name">
+                      Name
+                      <span className="-ml-1.5 text-destructive" aria-hidden="true">
+                        *
+                      </span>
+                    </FieldLabel>
+                    <Input
+                      id="class-name"
+                      placeholder="e.g. Class 1"
+                      aria-required
+                      aria-invalid={!!errors.name}
+                      aria-describedby={errors.name ? "class-name-error" : undefined}
+                      className="h-9"
+                      {...register("name")}
+                    />
+                    {errors.name && <FieldError id="class-name-error">{errors.name.message}</FieldError>}
+                  </Field>
+
+                  <Field data-invalid={!!errors.description} className="md:col-span-2">
+                    <FieldLabel htmlFor="class-description">Description</FieldLabel>
+                    <Textarea
+                      id="class-description"
+                      rows={6}
+                      placeholder="Optional"
+                      aria-invalid={!!errors.description}
+                      aria-describedby={errors.description ? "class-description-error" : undefined}
+                      className="resize-y"
+                      {...register("description")}
+                    />
+                    {errors.description && (
+                      <FieldError id="class-description-error">{errors.description.message}</FieldError>
+                    )}
+                  </Field>
+                </div>
+              </FieldSet>
+
+              {/* Phones: full-width buttons stacked with the submit on top. From "sm" up: one row on the right. */}
+              <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-end">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="lg"
+                  onClick={closeForm}
+                  disabled={isSubmitting}
+                  className="min-w-24"
+                >
+                  Cancel
+                </Button>
+                {/* aria-busy tells screen readers the form is being submitted */}
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={isSubmitting}
+                  aria-busy={isSubmitting}
+                  className="min-w-24"
+                >
+                  {isSubmitting && <Spinner />}
+                  {isSubmitting ? "Please wait..." : editingClass ? "Update" : "Add"}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       ) : (
         <List
           items={classes}
