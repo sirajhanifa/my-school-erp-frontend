@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import LoginPage from "./modules/auth/login/LoginPage";
 import DashboardPage from "./modules/dashboard/DashboardPage";
 import ClassesPage from "./modules/organization-setup/classes/ClassesPage";
+import SectionsPage from "./modules/organization-setup/sections/SectionsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
 import Toaster from "./components/toast/Toaster";
@@ -32,6 +33,7 @@ const App = () => {
         >
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/organization-setup/classes" element={<ClassesPage />} />
+          <Route path="/organization-setup/sections" element={<SectionsPage />} />
         </Route>
       </Routes>
       <Toaster />
