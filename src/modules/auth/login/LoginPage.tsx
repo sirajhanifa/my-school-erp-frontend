@@ -58,7 +58,7 @@ const LoginPage = () => {
           <CardContent className="px-4 py-6 sm:px-8">
             {/* noValidate: validation is handled by Zod, not the browser's built-in popups */}
             <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
@@ -80,7 +80,6 @@ const LoginPage = () => {
                     aria-required
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "login-email-error" : undefined}
-                    className="h-9"
                     {...register("email")}
                   />
                   {errors.email && <FieldError id="login-email-error">{errors.email.message}</FieldError>}
@@ -100,7 +99,6 @@ const LoginPage = () => {
                     aria-required
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "login-password-error" : undefined}
-                    className="h-9"
                     {...register("password")}
                   />
                   {errors.password && (

@@ -120,7 +120,7 @@ const ClassesPage = () => {
                 <FieldDescription>Basic information about the class.</FieldDescription>
 
                 {/* 2 columns from md up: Name on the left, Description across the full row */}
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
                   {/* data-invalid turns the label red when there is an error */}
                   <Field data-invalid={!!errors.name}>
                     <FieldLabel htmlFor="class-name">
@@ -135,7 +135,6 @@ const ClassesPage = () => {
                       aria-required
                       aria-invalid={!!errors.name}
                       aria-describedby={errors.name ? "class-name-error" : undefined}
-                      className="h-9"
                       {...register("name")}
                     />
                     {errors.name && <FieldError id="class-name-error">{errors.name.message}</FieldError>}

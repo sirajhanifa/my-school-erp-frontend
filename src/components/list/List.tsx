@@ -105,7 +105,7 @@ function List<T>({
         <label htmlFor={searchId} className="sr-only">
           Search
         </label>
-        <InputGroup className="h-9 w-full sm:w-72">
+        <InputGroup className="w-full sm:w-72">
           <InputGroupAddon>
             <Icon name="Search" size={16} />
           </InputGroupAddon>

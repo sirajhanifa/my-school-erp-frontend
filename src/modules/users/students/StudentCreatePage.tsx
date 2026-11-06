@@ -105,7 +105,7 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
             <FieldLegend className="font-semibold">Student Details</FieldLegend>
             <FieldDescription>Basic information about the student.</FieldDescription>
 
-            <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
               {/* data-invalid turns the label red when there is an error */}
               <Field data-invalid={!!errors.admissionNo}>
                 <FieldLabel htmlFor="student-admission-no">
@@ -117,7 +117,6 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
                   placeholder="e.g. 1001"
                   aria-required
                   aria-invalid={!!errors.admissionNo}
-                  className="h-9"
                   {...register("admissionNo")}
                 />
                 {errors.admissionNo && <FieldError>{errors.admissionNo.message}</FieldError>}
@@ -142,7 +141,7 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
                         id="student-gender"
                         aria-invalid={!!errors.gender}
                         onBlur={field.onBlur}
-                        className="h-9 w-full"
+                        className="w-full"
                       >
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
@@ -168,7 +167,6 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
                   id="student-first-name"
                   aria-required
                   aria-invalid={!!errors.firstName}
-                  className="h-9"
                   {...register("firstName")}
                 />
                 {errors.firstName && <FieldError>{errors.firstName.message}</FieldError>}
@@ -180,7 +178,6 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
                   id="student-last-name"
                   placeholder="Optional"
                   aria-invalid={!!errors.lastName}
-                  className="h-9"
                   {...register("lastName")}
                 />
                 {errors.lastName && <FieldError>{errors.lastName.message}</FieldError>}
@@ -198,7 +195,6 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
                   max={getTodayDateString()}
                   aria-required
                   aria-invalid={!!errors.dateOfBirth}
-                  className="h-9"
                   {...register("dateOfBirth")}
                 />
                 {errors.dateOfBirth && <FieldError>{errors.dateOfBirth.message}</FieldError>}
@@ -211,7 +207,7 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
             <FieldLegend className="font-semibold">Class &amp; Section</FieldLegend>
             <FieldDescription>The class and section the student studies in.</FieldDescription>
 
-            <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
               <Field data-invalid={!!errors.classId}>
                 <FieldLabel htmlFor="student-class">
                   Class
@@ -230,7 +226,7 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
                         id="student-class"
                         aria-invalid={!!errors.classId}
                         onBlur={field.onBlur}
-                        className="h-9 w-full"
+                        className="w-full"
                       >
                         <SelectValue placeholder="Select class" />
                       </SelectTrigger>
@@ -265,7 +261,7 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
                         id="student-section"
                         aria-invalid={!!errors.sectionId}
                         onBlur={field.onBlur}
-                        className="h-9 w-full"
+                        className="w-full"
                       >
                         <SelectValue placeholder="Select section" />
                       </SelectTrigger>
@@ -289,14 +285,13 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
             <FieldLegend className="font-semibold">Guardian &amp; Contact</FieldLegend>
             <FieldDescription>Who to contact about the student.</FieldDescription>
 
-            <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
               <Field data-invalid={!!errors.guardianName}>
                 <FieldLabel htmlFor="student-guardian">Guardian Name</FieldLabel>
                 <Input
                   id="student-guardian"
                   placeholder="Optional"
                   aria-invalid={!!errors.guardianName}
-                  className="h-9"
                   {...register("guardianName")}
                 />
                 {errors.guardianName && <FieldError>{errors.guardianName.message}</FieldError>}
@@ -309,7 +304,6 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
                   type="tel"
                   placeholder="Optional"
                   aria-invalid={!!errors.phone}
-                  className="h-9"
                   {...register("phone")}
                 />
                 {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
