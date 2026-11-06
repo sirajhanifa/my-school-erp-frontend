@@ -20,13 +20,7 @@ import { useClassStore } from "../../../store/classStore";
 import { useSectionStore } from "../../../store/sectionStore";
 import { useStudentStore, type Student } from "../../../store/studentStore";
 import { getTodayDateString } from "../../../utils/date";
-
-// The red * after the label of a required field
-const RequiredMark = () => (
-  <span className="-ml-1.5 text-destructive" aria-hidden="true">
-    *
-  </span>
-);
+import { RequiredMark } from "@/components/ui/required-mark";
 
 interface StudentCreatePageProps {
   // The student being edited; null = add a new student
