@@ -4,6 +4,7 @@ import { useOutletContext } from "react-router";
 import { Button } from "@/components/ui/button";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
+import ConfirmModal from "../../../components/modal/ConfirmModal";
 import type { AppLayoutContext } from "../../../components/layout/AppLayout";
 import { useStudentStore, type Student } from "../../../store/studentStore";
 import StudentCreatePage from "./StudentCreatePage";
@@ -26,6 +27,8 @@ const StudentListPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   // The student being edited; null = the form adds a new student
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  // The student waiting for delete confirmation; null = no popup
+  const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
 
   // Load the students once when the page opens
   useEffect(() => {
@@ -48,9 +51,11 @@ const StudentListPage = () => {
     setEditingStudent(null);
   };
 
-  const handleDelete = async (student: Student) => {
-    if (!window.confirm(`Delete student "${getFullName(student)}"?`)) return;
-    await deleteStudent(student.id);
+  // Runs when "Delete" is clicked in the confirm popup
+  const confirmDelete = async () => {
+    if (!deletingStudent) return;
+    await deleteStudent(deletingStudent.id);
+    setDeletingStudent(null);
   };
 
   // The form is a separate component, so it starts fresh every time it opens
@@ -108,7 +113,7 @@ const StudentListPage = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(student)}
+                  onClick={() => setDeletingStudent(student)}
                   aria-label={`Delete ${getFullName(student)}`}
                   className="text-muted-foreground hover:text-destructive"
                 >
@@ -118,6 +123,14 @@ const StudentListPage = () => {
             ),
           },
         ]}
+      />
+
+      <ConfirmModal
+        open={!!deletingStudent}
+        onClose={() => setDeletingStudent(null)}
+        onConfirm={confirmDelete}
+        title="Delete student"
+        message={`Delete student "${deletingStudent ? getFullName(deletingStudent) : ""}"? This cannot be undone.`}
       />
     </>
   );

@@ -18,6 +18,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
+import ConfirmModal from "../../../components/modal/ConfirmModal";
 import type { AppLayoutContext } from "../../../components/layout/AppLayout";
 import { classSchema, type ClassFormValues } from "../../../schemas/classSchema";
 import { useClassStore, type SchoolClass } from "../../../store/classStore";
@@ -42,6 +43,8 @@ const ClassesPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   // The class being edited; null = the form adds a new class
   const [editingClass, setEditingClass] = useState<SchoolClass | null>(null);
+  // The class waiting for delete confirmation; null = no popup
+  const [deletingClass, setDeletingClass] = useState<SchoolClass | null>(null);
 
   const {
     register,
@@ -86,9 +89,11 @@ const ClassesPage = () => {
     if (success) closeForm();
   };
 
-  const handleDelete = async (cls: SchoolClass) => {
-    if (!window.confirm(`Delete class "${cls.name}"?`)) return;
-    await deleteClass(cls.id);
+  // Runs when "Delete" is clicked in the confirm popup
+  const confirmDelete = async () => {
+    if (!deletingClass) return;
+    await deleteClass(deletingClass.id);
+    setDeletingClass(null);
   };
 
   return (
@@ -222,7 +227,7 @@ const ClassesPage = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDelete(cls)}
+                    onClick={() => setDeletingClass(cls)}
                     aria-label={`Delete ${cls.name}`}
                     className="text-muted-foreground hover:text-destructive"
                   >
@@ -234,6 +239,14 @@ const ClassesPage = () => {
           ]}
         />
       )}
+
+      <ConfirmModal
+        open={!!deletingClass}
+        onClose={() => setDeletingClass(null)}
+        onConfirm={confirmDelete}
+        title="Delete class"
+        message={`Delete class "${deletingClass?.name ?? ""}"? This cannot be undone.`}
+      />
     </>
   );
 };

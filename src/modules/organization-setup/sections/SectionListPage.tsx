@@ -4,6 +4,7 @@ import { useOutletContext } from "react-router";
 import { Button } from "@/components/ui/button";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
+import ConfirmModal from "../../../components/modal/ConfirmModal";
 import type { AppLayoutContext } from "../../../components/layout/AppLayout";
 import { useSectionStore, type Section } from "../../../store/sectionStore";
 import { toDateString } from "../../../utils/date";
@@ -24,6 +25,8 @@ const SectionListPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   // The section being edited; null = the form adds a new section
   const [editingSection, setEditingSection] = useState<Section | null>(null);
+  // The section waiting for delete confirmation; null = no popup
+  const [deletingSection, setDeletingSection] = useState<Section | null>(null);
 
   // Load the sections once when the page opens
   useEffect(() => {
@@ -46,9 +49,11 @@ const SectionListPage = () => {
     setEditingSection(null);
   };
 
-  const handleDelete = async (section: Section) => {
-    if (!window.confirm(`Delete section "${section.name}"?`)) return;
-    await deleteSection(section.id);
+  // Runs when "Delete" is clicked in the confirm popup
+  const confirmDelete = async () => {
+    if (!deletingSection) return;
+    await deleteSection(deletingSection.id);
+    setDeletingSection(null);
   };
 
   // The form is a separate component, so it starts fresh every time it opens
@@ -105,7 +110,7 @@ const SectionListPage = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(section)}
+                  onClick={() => setDeletingSection(section)}
                   aria-label={`Delete ${section.name}`}
                   className="text-muted-foreground hover:text-destructive"
                 >
@@ -115,6 +120,14 @@ const SectionListPage = () => {
             ),
           },
         ]}
+      />
+
+      <ConfirmModal
+        open={!!deletingSection}
+        onClose={() => setDeletingSection(null)}
+        onConfirm={confirmDelete}
+        title="Delete section"
+        message={`Delete section "${deletingSection?.name ?? ""}"? This cannot be undone.`}
       />
     </>
   );

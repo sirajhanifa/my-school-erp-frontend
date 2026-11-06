@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
+import ConfirmModal from "../../../components/modal/ConfirmModal";
 import type { AppLayoutContext } from "../../../components/layout/AppLayout";
 import { useEmployeeStore, type Employee } from "../../../store/employeeStore";
 import EmployeeCreatePage from "./EmployeeCreatePage";
@@ -24,6 +25,8 @@ const EmployeeListPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   // The employee being edited; null = the form adds a new employee
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  // The employee waiting for delete confirmation; null = no popup
+  const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(null);
 
   // Load the employees once when the page opens
   useEffect(() => {
@@ -46,9 +49,11 @@ const EmployeeListPage = () => {
     setEditingEmployee(null);
   };
 
-  const handleDelete = async (employee: Employee) => {
-    if (!window.confirm(`Delete employee "${employee.name}"?`)) return;
-    await deleteEmployee(employee.id);
+  // Runs when "Delete" is clicked in the confirm popup
+  const confirmDelete = async () => {
+    if (!deletingEmployee) return;
+    await deleteEmployee(deletingEmployee.id);
+    setDeletingEmployee(null);
   };
 
   // The form is a separate component, so it starts fresh every time it opens
@@ -113,7 +118,7 @@ const EmployeeListPage = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(employee)}
+                  onClick={() => setDeletingEmployee(employee)}
                   aria-label={`Delete ${employee.name}`}
                   className="text-muted-foreground hover:text-destructive"
                 >
@@ -123,6 +128,14 @@ const EmployeeListPage = () => {
             ),
           },
         ]}
+      />
+
+      <ConfirmModal
+        open={!!deletingEmployee}
+        onClose={() => setDeletingEmployee(null)}
+        onConfirm={confirmDelete}
+        title="Delete employee"
+        message={`Delete employee "${deletingEmployee?.name ?? ""}"? They will no longer be able to log in.`}
       />
     </>
   );
