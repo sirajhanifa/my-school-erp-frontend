@@ -46,7 +46,7 @@ src/
 - **Router**: import from `"react-router"` (v7), not `react-router-dom`.
 - Styling is Tailwind utility classes with the slate palette and blue accents; no CSS modules.
 - **shadcn/ui**: generated components live in `src/components/ui/` (import as `@/components/ui/button`). Theme colors are CSS variables in `src/index.css` (`:root` / `.dark`); `--primary` is our blue. Use theme classes (`text-muted-foreground`, `bg-primary`, `text-destructive`) in new code. Don't put our own components in `ui/`. Use shadcn's `Button`, `Spinner`, `DropdownMenu` etc. instead of hand-built ones.
-- Not on shadcn (by choice): `toast/Toaster.tsx` (custom toast with countdown bar) and `layout/Sidebar.tsx`.
+- Not on shadcn (by choice): `toast/Toaster.tsx` (custom toast with countdown bar). `layout/Sidebar.tsx` is a custom layout (own collapse logic and flyout) built with shadcn `Button`/`Skeleton` and theme tokens.
 - Local imports have no file extension (bundler resolution). Components are default-exported arrow functions (form-kit components are generic `function`s).
 - Comments are plain-English and explain *why* (the codebase is written to be readable by learners). Keep that style.
 - Keep comments simple and clear: one or two lines maximum. Avoid long explanations in comments.

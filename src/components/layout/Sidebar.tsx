@@ -2,42 +2,55 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, useLocation } from "react-router";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import Icon from "../icon/Icon";
 import type { IconName } from "../icon/Icon";
 import { useModuleStore } from "../../store/moduleStore";
 import type { MainMenu } from "../../store/moduleStore";
 
-// Shared look of every menu row: shape, spacing, hover and keyboard focus ring
+// Shared look of every menu row: shape, spacing, soft hover fade and keyboard focus ring
 const rowBase =
-  "group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-blue-500 motion-reduce:transition-none";
+  "group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium outline-none transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-ring/60 motion-reduce:transition-none";
 
-// Main menu link: blue background plus a blue bar on the sidebar's left edge when active
+// Colours of a row that is not the current page
+const rowIdle = "text-slate-600 hover:bg-slate-100 hover:text-slate-900";
+
+// Colours of the current page's row: light blue tint, blue text
+const rowActive = "bg-primary/10 text-primary font-semibold";
+
+// Main menu link: when active, a blue bar also sits on the sidebar's left edge
 const mainLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `${rowBase} ${
+  cn(
+    rowBase,
     isActive
-      ? "bg-blue-50 text-blue-700 before:absolute before:inset-y-1 before:-left-3 before:w-1 before:rounded-r-full before:bg-blue-600"
-      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-  }`;
+      ? `${rowActive} before:absolute before:inset-y-1.5 before:-left-3 before:w-1 before:rounded-r-full before:bg-primary`
+      : rowIdle,
+  );
 
 // Submenu link: when active, its blue bar sits on top of the grey guide line
 const subLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `${rowBase} py-1.5 ${
+  cn(
+    rowBase,
+    "py-2",
     isActive
-      ? "bg-blue-50 text-blue-700 before:absolute before:inset-y-1 before:-left-[9px] before:w-0.5 before:rounded-full before:bg-blue-600"
-      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-  }`;
+      ? `${rowActive} before:absolute before:inset-y-1.5 before:-left-[9px] before:w-0.5 before:rounded-full before:bg-primary`
+      : rowIdle,
+  );
 
 // Submenu link inside the flyout: same colours, no guide line to sit on
 const flyoutLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `${rowBase} py-1.5 ${
-    isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-  }`;
+  cn(rowBase, "py-2", isActive ? rowActive : rowIdle);
 
 // Icon colour: darker on hover, blue on the current page.
 // NavLink sets aria-current="page" on the active link, which the blue class reads.
 const iconBase =
-  "shrink-0 transition-colors duration-150 group-hover:text-slate-600 group-aria-[current=page]:text-blue-600 motion-reduce:transition-none";
-const iconClass = `${iconBase} text-slate-400`;
+  "shrink-0 transition-[color,translate] duration-150 ease-out group-hover:text-slate-600 group-aria-[current=page]:text-primary motion-reduce:transition-none";
+const iconClass = cn(iconBase, "text-slate-400");
+
+// Submenu icons nudge right a little on hover
+const subIconClass = cn(iconClass, "group-hover:translate-x-0.5");
 
 // localStorage key that remembers whether the desktop sidebar is collapsed
 const COLLAPSED_KEY = "sidebarCollapsed";
@@ -105,9 +118,9 @@ const SubMenuFlyout = ({ menu, anchor, style, onClose }: FlyoutProps) => {
     <div
       ref={ref}
       style={style}
-      className="fixed z-50 w-56 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg"
+      className="fixed z-50 w-60 overflow-y-auto rounded-xl border border-slate-200 bg-popover p-2 text-popover-foreground shadow-xl shadow-slate-900/10 duration-150 animate-in fade-in-0 zoom-in-95 slide-in-from-left-1 motion-reduce:animate-none"
     >
-      <p className="px-3 pt-1.5 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+      <p className="mb-1 border-b border-slate-100 px-3 pt-1 pb-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">
         {menu.name}
       </p>
       <nav aria-label={menu.name} className="space-y-0.5">
@@ -119,7 +132,7 @@ const SubMenuFlyout = ({ menu, anchor, style, onClose }: FlyoutProps) => {
             onClick={onClose}
             className={flyoutLinkClass}
           >
-            <Icon name={subMenu.icon as IconName} size={16} className={iconClass} />
+            <Icon name={subMenu.icon as IconName} size={16} className={subIconClass} />
             <span className="truncate">{subMenu.name}</span>
           </NavLink>
         ))}
@@ -143,7 +156,7 @@ interface SidebarProps {
 
 // Left-hand menu built from the modules stored in the database (see moduleStore).
 // On desktop it is always visible and can be collapsed to icons only;
-// on small screens it slides in over the page at full width.
+// on small screens it slides in over the page.
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const modules = useModuleStore((state) => state.modules);
   const isLoading = useModuleStore((state) => state.isLoading);
@@ -215,57 +228,72 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     setFlyout({ code, anchor: button, style, pathname: location.pathname });
   };
 
-  // Collapsed styles use "lg:" so they only apply on desktop, never to the mobile menu
-  const hideWhenCollapsed = isCollapsed ? "lg:hidden" : "";
-  const centerWhenCollapsed = isCollapsed ? "lg:justify-center lg:px-0" : "";
+  // Collapsed styles use "lg:" so they only apply on desktop, never to the mobile menu.
+  // Labels fade in when they reappear after expanding.
+  const hideWhenCollapsed = isCollapsed
+    ? "lg:hidden"
+    : "duration-200 animate-in fade-in-0 motion-reduce:animate-none";
+  // Collapsed rows become even 40px icon squares in the middle of the bar
+  const squareWhenCollapsed = isCollapsed ? "lg:mx-auto lg:size-10 lg:justify-center lg:px-0" : "";
 
   return (
     <>
-      {/* Dark backdrop behind the mobile menu; tapping it closes the menu */}
+      {/* Blurred dark backdrop behind the mobile menu; tapping it closes the menu */}
       {isOpen && (
-        <div className="fixed inset-0 z-30 bg-slate-900/40 lg:hidden" onClick={onClose} />
+        <div
+          className="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-[2px] duration-200 animate-in fade-in-0 motion-reduce:animate-none lg:hidden"
+          onClick={onClose}
+        />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white transition-all duration-200 motion-reduce:transition-none lg:static lg:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } ${isCollapsed ? "lg:w-16" : ""}`}
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar shadow-xl transition-all duration-300 ease-out motion-reduce:transition-none lg:static lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none",
+          isOpen ? "translate-x-0" : "-translate-x-full",
+          isCollapsed && "lg:w-16",
+        )}
       >
         {/* Same height as the topbar so their bottom borders line up */}
         <div
-          className={`flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5 ${centerWhenCollapsed}`}
+          className={cn(
+            "flex h-16 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border px-4",
+            isCollapsed && "lg:justify-center lg:px-0",
+          )}
         >
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
-              <Icon name="GraduationCap" size={18} />
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/30">
+              <Icon name="GraduationCap" size={20} />
             </span>
-            <span
-              className={`whitespace-nowrap text-base font-semibold tracking-tight text-slate-900 ${hideWhenCollapsed}`}
-            >
-              MySchool ERP
-            </span>
+            <div className={cn("min-w-0 leading-tight", hideWhenCollapsed)}>
+              <p className="truncate text-base font-semibold tracking-tight text-slate-900">
+                MySchool ERP
+              </p>
+              <p className="truncate text-xs text-muted-foreground">School Management</p>
+            </div>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-lg"
             onClick={onClose}
             aria-label="Close menu"
-            className="rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden"
+            className="text-muted-foreground lg:hidden"
           >
             <Icon name="X" size={20} />
-          </button>
+          </Button>
         </div>
 
         {/* Scrolls on its own when the menu is longer than the screen */}
-        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 space-y-1 overflow-x-hidden overflow-y-auto px-3 py-4">
           {/* First load: grey placeholder rows where the menu will appear */}
           {isLoading &&
             modules.length === 0 &&
             [1, 2, 3, 4, 5].map((row) => (
-              <div key={row} className={`flex items-center gap-3 px-3 py-2 ${centerWhenCollapsed}`}>
-                <div className="size-4.5 shrink-0 animate-pulse rounded bg-slate-200" />
-                <div
-                  className={`h-3 flex-1 animate-pulse rounded bg-slate-200 ${hideWhenCollapsed}`}
-                />
+              <div
+                key={row}
+                className={cn("flex items-center gap-3 px-3 py-2.5", squareWhenCollapsed)}
+              >
+                <Skeleton className="size-4.5 shrink-0 rounded bg-slate-200" />
+                <Skeleton className={cn("h-3 flex-1 rounded bg-slate-200", hideWhenCollapsed)} />
               </div>
             ))}
 
@@ -280,10 +308,10 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                   to={menu.path}
                   onClick={onClose}
                   title={isCollapsed ? menu.name : undefined}
-                  className={(state) => `${mainLinkClass(state)} ${centerWhenCollapsed}`}
+                  className={(state) => cn(mainLinkClass(state), squareWhenCollapsed)}
                 >
                   <Icon name={menu.icon as IconName} size={18} className={iconClass} />
-                  <span className={`truncate ${hideWhenCollapsed}`}>{menu.name}</span>
+                  <span className={cn("truncate", hideWhenCollapsed)}>{menu.name}</span>
                 </NavLink>
               );
             }
@@ -302,28 +330,34 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                   aria-expanded={isCollapsed ? isFlyoutOpen : isMenuOpen}
                   aria-haspopup={isCollapsed ? "true" : undefined}
                   title={isCollapsed ? menu.name : undefined}
-                  className={`${rowBase} hover:bg-slate-100 hover:text-slate-900 ${centerWhenCollapsed} ${
-                    hasCurrentPage ? "text-slate-900" : "text-slate-600"
-                  } ${isFlyoutOpen ? "bg-slate-100" : ""}`}
+                  className={cn(
+                    rowBase,
+                    "hover:bg-slate-100 hover:text-slate-900",
+                    hasCurrentPage ? "text-slate-900" : "text-slate-600",
+                    // Collapsed: the group holding the current page gets the blue tint
+                    hasCurrentPage && isCollapsed && "lg:bg-primary/10",
+                    isFlyoutOpen && "bg-slate-100",
+                    squareWhenCollapsed,
+                  )}
                 >
-                  {/* When collapsed, a blue icon shows the current page is in this group */}
+                  {/* Blue icon when the current page is inside this group */}
                   <Icon
                     name={menu.icon as IconName}
                     size={18}
-                    className={`${iconBase} ${hasCurrentPage ? "text-slate-600" : "text-slate-400"} ${
-                      hasCurrentPage && isCollapsed ? "lg:text-blue-600" : ""
-                    }`}
+                    className={cn(iconBase, hasCurrentPage ? "text-primary" : "text-slate-400")}
                   />
-                  <span className={`flex-1 truncate text-left ${hideWhenCollapsed}`}>
+                  <span className={cn("flex-1 truncate text-left", hideWhenCollapsed)}>
                     {menu.name}
                   </span>
                   {/* One chevron that turns to point down when the group is open */}
                   <Icon
                     name="ChevronRight"
                     size={16}
-                    className={`shrink-0 text-slate-400 transition-transform duration-200 motion-reduce:transition-none ${
-                      isMenuOpen ? "rotate-90" : ""
-                    } ${hideWhenCollapsed}`}
+                    className={cn(
+                      "shrink-0 text-slate-400 transition-transform duration-300 ease-out group-hover:text-slate-600 motion-reduce:transition-none",
+                      isMenuOpen && "rotate-90",
+                      hideWhenCollapsed,
+                    )}
                   />
                 </button>
 
@@ -331,13 +365,21 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     inert = closed submenu links can't be tabbed to or clicked. */}
                 <div
                   inert={!isMenuOpen}
-                  className={`grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none ${
-                    isMenuOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                  } ${hideWhenCollapsed}`}
+                  className={cn(
+                    "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+                    isMenuOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                    isCollapsed && "lg:hidden",
+                  )}
                 >
                   <div className="min-h-0 overflow-hidden">
-                    {/* Grey guide line on the left groups the submenus under their parent */}
-                    <div className="my-1 ml-5 space-y-0.5 border-l border-slate-200 pl-2">
+                    {/* Grey guide line on the left groups the submenus under their parent.
+                        The list also fades and slides down slightly while opening. */}
+                    <div
+                      className={cn(
+                        "my-1 ml-5 space-y-0.5 border-l border-slate-200 pl-2 transition-[opacity,translate] duration-300 ease-out motion-reduce:transition-none",
+                        isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0",
+                      )}
+                    >
                       {menu.subMenus.map((subMenu) => (
                         // "end" = only highlight on an exact match, so "/students" is not
                         // highlighted while on "/students/admission"
@@ -351,7 +393,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                           <Icon
                             name={subMenu.icon as IconName}
                             size={16}
-                            className={iconClass}
+                            className={subIconClass}
                           />
                           <span className="truncate">{subMenu.name}</span>
                         </NavLink>
@@ -365,21 +407,24 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         </nav>
 
         {/* Desktop only: switch between the full sidebar and icons only */}
-        <div className="hidden shrink-0 border-t border-slate-200 p-3 lg:block">
-          <button
-            type="button"
+        <div className="hidden shrink-0 border-t border-sidebar-border p-3 lg:block">
+          <Button
+            variant="ghost"
             onClick={toggleCollapsed}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={isCollapsed ? "Expand sidebar" : undefined}
-            className={`${rowBase} text-slate-600 hover:bg-slate-100 hover:text-slate-900 ${centerWhenCollapsed}`}
+            className={cn(
+              "group h-10 w-full justify-start gap-3 px-3 font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+              squareWhenCollapsed,
+            )}
           >
             <Icon
               name={isCollapsed ? "PanelLeftOpen" : "PanelLeftClose"}
               size={18}
               className={iconClass}
             />
-            <span className={`truncate ${hideWhenCollapsed}`}>Collapse</span>
-          </button>
+            <span className={cn("truncate", hideWhenCollapsed)}>Collapse</span>
+          </Button>
         </div>
       </aside>
 
