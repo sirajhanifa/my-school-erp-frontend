@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import LoginPage from "./modules/auth/login/LoginPage";
 import DashboardPage from "./modules/dashboard/DashboardPage";
-import ClassesPage from "./modules/organization-setup/classes/ClassesPage";
+import ClassListPage from "./modules/organization-setup/classes/ClassListPage";
 import SectionListPage from "./modules/organization-setup/sections/SectionListPage";
 import StudentListPage from "./modules/users/students/StudentListPage";
 import EmployeeListPage from "./modules/users/employees/EmployeeListPage";
@@ -34,7 +34,7 @@ const App = () => {
           }
         >
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/organization-setup/classes" element={<ClassesPage />} />
+          <Route path="/organization-setup/classes" element={<ClassListPage />} />
           <Route path="/organization-setup/sections" element={<SectionListPage />} />
           <Route path="/users/students" element={<StudentListPage />} />
           <Route path="/users/employees" element={<EmployeeListPage />} />
