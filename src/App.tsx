@@ -4,6 +4,7 @@ import LoginPage from "./modules/auth/login/LoginPage";
 import DashboardPage from "./modules/dashboard/DashboardPage";
 import ClassListPage from "./modules/organization-setup/classes/ClassListPage";
 import SectionListPage from "./modules/organization-setup/sections/SectionListPage";
+import AcademicYearListPage from "./modules/organization-setup/academic-years/AcademicYearListPage";
 import StudentListPage from "./modules/users/students/StudentListPage";
 import EmployeeListPage from "./modules/users/employees/EmployeeListPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -36,6 +37,7 @@ const App = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/organization-setup/classes" element={<ClassListPage />} />
           <Route path="/organization-setup/sections" element={<SectionListPage />} />
+          <Route path="/organization-setup/academic-years" element={<AcademicYearListPage />} />
           <Route path="/users/students" element={<StudentListPage />} />
           <Route path="/users/employees" element={<EmployeeListPage />} />
         </Route>
