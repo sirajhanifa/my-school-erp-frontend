@@ -1,7 +1,8 @@
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
   FieldDescription,
@@ -30,14 +31,16 @@ const SectionCreatePage = ({ section, onClose }: SectionCreatePageProps) => {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SectionFormValues>({
     resolver: zodResolver(sectionSchema),
-    // Edit: start with the section's values. Add: start empty.
+    // Edit: start with the section's values. Add: start empty and Active (checkbox checked).
     defaultValues: {
       name: section?.name ?? "",
       description: section?.description ?? "",
+      deleted: section?.deleted ?? false,
     },
   });
 
@@ -85,6 +88,23 @@ const SectionCreatePage = ({ section, onClose }: SectionCreatePageProps) => {
                   {...register("name")}
                 />
                 {errors.name && <FieldError id="section-name-error">{errors.name.message}</FieldError>}
+              </Field>
+
+              {/* Checkbox is not a plain input, so Controller connects it to the form.
+                  The form stores "deleted", so checked (Active) = deleted: false. */}
+              <Field orientation="horizontal" className="md:self-end md:pb-2">
+                <Controller
+                  name="deleted"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="section-active"
+                      checked={!field.value}
+                      onCheckedChange={(checked) => field.onChange(!checked)}
+                    />
+                  )}
+                />
+                <FieldLabel htmlFor="section-active">Active</FieldLabel>
               </Field>
 
               <Field data-invalid={!!errors.description} className="md:col-span-2">

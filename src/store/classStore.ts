@@ -9,6 +9,8 @@ export interface SchoolClass {
   id: string;
   name: string;
   description: string;
+  // Status: true = Inactive, false = Active
+  deleted: boolean;
   createdAt: string;
 }
 
@@ -80,7 +82,10 @@ export const useClassStore = create<ClassState>()((set) => ({
   deleteClass: async (id) => {
     try {
       const response = await api.delete(`/classes/${id}`);
-      set((state) => ({ classes: state.classes.filter((cls) => cls.id !== id) }));
+      // Deleting makes the class Inactive; it stays in the list
+      set((state) => ({
+        classes: state.classes.map((cls) => (cls.id === id ? { ...cls, deleted: true } : cls)),
+      }));
       toast.success(response.data.message);
       return true;
     } catch (error) {

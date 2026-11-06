@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useOutletContext } from "react-router";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
@@ -77,7 +78,7 @@ const ClassListPage = () => {
       <List
         items={classes}
         getKey={(cls) => cls.id}
-        getSearchText={(cls) => `${cls.name} ${cls.description}`}
+        getSearchText={(cls) => `${cls.name} ${cls.description} ${cls.deleted ? "Inactive" : "Active"}`}
         searchPlaceholder="Search classes..."
         isLoading={isLoading}
         emptyMessage="No classes yet. Click Add Class to create one."
@@ -88,6 +89,15 @@ const ClassListPage = () => {
             className: "whitespace-nowrap",
           },
           { header: "Description", render: (cls) => cls.description || "-" },
+          {
+            // Deleted classes are shown as Inactive
+            header: "Status",
+            render: (cls) => (
+              <Badge variant={cls.deleted ? "destructive" : "secondary"}>
+                {cls.deleted ? "Inactive" : "Active"}
+              </Badge>
+            ),
+          },
           {
             header: "Created",
             render: (cls) => toDateString(new Date(cls.createdAt)),
@@ -107,15 +117,18 @@ const ClassListPage = () => {
                 >
                   <Icon name="Pencil" size={16} />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setDeletingClass(cls)}
-                  aria-label={`Delete ${cls.name}`}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <Icon name="Trash2" size={16} />
-                </Button>
+                {/* An inactive class is already deleted, so it has no Delete button */}
+                {!cls.deleted && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDeletingClass(cls)}
+                    aria-label={`Delete ${cls.name}`}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Icon name="Trash2" size={16} />
+                  </Button>
+                )}
               </div>
             ),
           },

@@ -9,6 +9,8 @@ export interface Section {
   id: string;
   name: string;
   description: string;
+  // Status: true = Inactive, false = Active
+  deleted: boolean;
   createdAt: string;
 }
 
@@ -82,7 +84,12 @@ export const useSectionStore = create<SectionState>()((set) => ({
   deleteSection: async (id) => {
     try {
       const response = await api.delete(`/sections/${id}`);
-      set((state) => ({ sections: state.sections.filter((section) => section.id !== id) }));
+      // Deleting makes the section Inactive; it stays in the list
+      set((state) => ({
+        sections: state.sections.map((section) =>
+          section.id === id ? { ...section, deleted: true } : section,
+        ),
+      }));
       toast.success(response.data.message);
       return true;
     } catch (error) {

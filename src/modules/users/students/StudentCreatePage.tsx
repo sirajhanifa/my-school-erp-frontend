@@ -69,8 +69,14 @@ const StudentCreatePage = ({ student, onClose }: StudentCreatePageProps) => {
   }, [fetchClasses, fetchSections]);
 
   // "items" tells each Select which label to show for the selected value
-  const classItems = classes.map((cls) => ({ label: cls.name, value: cls.id }));
-  const sectionItems = sections.map((section) => ({ label: section.name, value: section.id }));
+  // Only active classes can be picked for a student
+  const classItems = classes
+    .filter((cls) => !cls.deleted)
+    .map((cls) => ({ label: cls.name, value: cls.id }));
+  // Only active sections can be picked for a student
+  const sectionItems = sections
+    .filter((section) => !section.deleted)
+    .map((section) => ({ label: section.name, value: section.id }));
   const genderItems = GENDERS.map((gender) => ({ label: gender, value: gender }));
 
   // The store shows the toast and updates the list; we only close the form when it worked

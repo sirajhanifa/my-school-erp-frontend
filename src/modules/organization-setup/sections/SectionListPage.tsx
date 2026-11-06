@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useOutletContext } from "react-router";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
@@ -77,7 +78,9 @@ const SectionListPage = () => {
       <List
         items={sections}
         getKey={(section) => section.id}
-        getSearchText={(section) => `${section.name} ${section.description}`}
+        getSearchText={(section) =>
+          `${section.name} ${section.description} ${section.deleted ? "Inactive" : "Active"}`
+        }
         searchPlaceholder="Search sections..."
         isLoading={isLoading}
         emptyMessage="No sections yet. Click Add Section to create one."
@@ -88,6 +91,15 @@ const SectionListPage = () => {
             className: "whitespace-nowrap",
           },
           { header: "Description", render: (section) => section.description || "-" },
+          {
+            // Deleted sections are shown as Inactive
+            header: "Status",
+            render: (section) => (
+              <Badge variant={section.deleted ? "destructive" : "secondary"}>
+                {section.deleted ? "Inactive" : "Active"}
+              </Badge>
+            ),
+          },
           {
             header: "Created",
             render: (section) => toDateString(new Date(section.createdAt)),
@@ -107,15 +119,18 @@ const SectionListPage = () => {
                 >
                   <Icon name="Pencil" size={16} />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setDeletingSection(section)}
-                  aria-label={`Delete ${section.name}`}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <Icon name="Trash2" size={16} />
-                </Button>
+                {/* An inactive section is already deleted, so it has no Delete button */}
+                {!section.deleted && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDeletingSection(section)}
+                    aria-label={`Delete ${section.name}`}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Icon name="Trash2" size={16} />
+                  </Button>
+                )}
               </div>
             ),
           },
