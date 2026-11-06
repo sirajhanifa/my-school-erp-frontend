@@ -21,11 +21,22 @@ export interface EmployeeRole {
   name: string;
 }
 
+// The filters the employee list understands ("" or missing = All)
+export interface EmployeeFilter {
+  roleId?: string;
+}
+
+// Counts list requests, so a slow old answer cannot overwrite a newer one
+let latestRequestNo = 0;
+
 interface EmployeeState {
   employees: Employee[];
   roles: EmployeeRole[];
   isLoading: boolean;
-  fetchEmployees: () => Promise<void>;
+  // true until the roles have loaded (FilterBar waits for it)
+  isRolesLoading: boolean;
+  // Optional filter from FilterBar; nothing passed = all employees
+  fetchEmployees: (filter?: EmployeeFilter) => Promise<void>;
   fetchRoles: () => Promise<void>;
   // These return true on success, so the page knows when to close its form
   createEmployee: (values: EmployeeFormValues) => Promise<boolean>;
@@ -48,24 +59,37 @@ export const useEmployeeStore = create<EmployeeState>()((set) => ({
   roles: [],
   // true at the start, so the page shows a spinner instead of "No employees yet" before the first load
   isLoading: true,
+  isRolesLoading: true,
 
-  fetchEmployees: async () => {
+  fetchEmployees: async (filter = {}) => {
     set({ isLoading: true });
 
+    // If the user changes the filter again before this request answers,
+    // only the newest answer may fill the list.
+    const requestNo = ++latestRequestNo;
+
+    // Send only the filters that are set; "" means "All"
+    const params = { roleId: filter.roleId || undefined };
+
     try {
-      const response = await api.get("/employees");
+      const response = await api.get("/employees", { params });
+      if (requestNo !== latestRequestNo) return;
       set({ employees: response.data.employees, isLoading: false });
     } catch (error) {
+      if (requestNo !== latestRequestNo) return;
       set({ employees: [], isLoading: false });
       toast.error(getErrorMessage(error, "Could not load employees"));
     }
   },
 
   fetchRoles: async () => {
+    set({ isRolesLoading: true });
+
     try {
       const response = await api.get("/employees/roles");
-      set({ roles: response.data.roles });
+      set({ roles: response.data.roles, isRolesLoading: false });
     } catch (error) {
+      set({ isRolesLoading: false });
       toast.error(getErrorMessage(error, "Could not load roles"));
     }
   },

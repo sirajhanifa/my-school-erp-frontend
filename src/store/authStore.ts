@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { LoginFormValues } from "../schemas/loginSchema";
 import api from "../components/axios/axios";
+import { useFilterStore } from "./filterStore";
 import { useModuleStore } from "./moduleStore";
 
 export interface AuthUser {
@@ -60,8 +61,9 @@ export const useAuthStore = create<AuthState>()((set) => ({
         isAuthenticated: false,
         error: null,
       });
-      // Forget this school's menu
+      // Forget this school's menu and the selected filters
       useModuleStore.getState().reset();
+      useFilterStore.getState().reset();
     }
   },
 

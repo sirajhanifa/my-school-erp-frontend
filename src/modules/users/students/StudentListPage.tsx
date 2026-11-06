@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useOutletContext } from "react-router";
 import { Button } from "@/components/ui/button";
+import FilterBar from "../../../components/filter/FilterBar";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
 import ConfirmModal from "../../../components/modal/ConfirmModal";
 import type { AppLayoutContext } from "../../../components/layout/AppLayout";
+import { useFilterStore } from "../../../store/filterStore";
 import { useStudentStore, type Student } from "../../../store/studentStore";
 import StudentCreatePage from "./StudentCreatePage";
 
@@ -30,10 +32,15 @@ const StudentListPage = () => {
   // The student waiting for delete confirmation; null = no popup
   const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
 
-  // Load the students once when the page opens
+  // The class / section picked in the FilterBar ("" = All)
+  const classId = useFilterStore((state) => state.classId);
+  const sectionId = useFilterStore((state) => state.sectionId);
+
+  // Load the students when the page opens, and again after each Search.
+  // Class is required here, so nothing is loaded until a class has been searched.
   useEffect(() => {
-    fetchStudents();
-  }, [fetchStudents]);
+    if (classId) fetchStudents({ classId, sectionId });
+  }, [fetchStudents, classId, sectionId]);
 
   const openAddForm = () => {
     setEditingStudent(null);
@@ -76,15 +83,25 @@ const StudentListPage = () => {
           topbarActions,
         )}
 
+      {/* Students have no academic year yet, so only class and section */}
+      <div className="mb-4">
+        <FilterBar fields={["class", "section"]} required={["class"]} />
+      </div>
+
       <List
-        items={students}
+        // No class searched yet: show an empty list with a hint instead of old results
+        items={classId ? students : []}
         getKey={(student) => student.id}
         getSearchText={(student) =>
           `${student.admissionNo} ${getFullName(student)} ${student.className} ${student.sectionName} ${student.guardianName} ${student.phone}`
         }
         searchPlaceholder="Search students..."
-        isLoading={isLoading}
-        emptyMessage="No students yet. Click Add Student to create one."
+        isLoading={classId ? isLoading : false}
+        emptyMessage={
+          classId
+            ? "No students found. Click Add Student to create one."
+            : "Select a class and click Search to see students."
+        }
         columns={[
           { header: "Admission No", render: (student) => student.admissionNo, className: "whitespace-nowrap" },
           {

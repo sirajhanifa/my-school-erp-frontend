@@ -3,11 +3,13 @@ import { createPortal } from "react-dom";
 import { useOutletContext } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import FilterBar from "../../../components/filter/FilterBar";
 import Icon from "../../../components/icon/Icon";
 import List from "../../../components/list/List";
 import ConfirmModal from "../../../components/modal/ConfirmModal";
 import type { AppLayoutContext } from "../../../components/layout/AppLayout";
 import { useEmployeeStore, type Employee } from "../../../store/employeeStore";
+import { useFilterStore } from "../../../store/filterStore";
 import EmployeeCreatePage from "./EmployeeCreatePage";
 
 // Shows the employee list; "Add Employee" (topbar) or "Edit" swaps it for EmployeeCreatePage.
@@ -28,10 +30,13 @@ const EmployeeListPage = () => {
   // The employee waiting for delete confirmation; null = no popup
   const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(null);
 
-  // Load the employees once when the page opens
+  // The role picked in the FilterBar ("" = All)
+  const roleId = useFilterStore((state) => state.roleId);
+
+  // Load the employees when the page opens, and again after each Search
   useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
+    fetchEmployees({ roleId });
+  }, [fetchEmployees, roleId]);
 
   const openAddForm = () => {
     setEditingEmployee(null);
@@ -74,13 +79,19 @@ const EmployeeListPage = () => {
           topbarActions,
         )}
 
+      <div className="mb-4">
+        <FilterBar fields={["role"]} />
+      </div>
+
       <List
         items={employees}
         getKey={(employee) => employee.id}
         getSearchText={(employee) => `${employee.name} ${employee.email} ${employee.roleName}`}
         searchPlaceholder="Search employees..."
         isLoading={isLoading}
-        emptyMessage="No employees yet. Click Add Employee to create one."
+        emptyMessage={
+          roleId ? "No employees with this role." : "No employees yet. Click Add Employee to create one."
+        }
         columns={[
           {
             header: "Name",

@@ -22,10 +22,20 @@ export interface Student {
   createdAt: string;
 }
 
+// The filters the student list understands ("" or missing = All)
+export interface StudentFilter {
+  classId?: string;
+  sectionId?: string;
+}
+
+// Counts list requests, so a slow old answer cannot overwrite a newer one
+let latestRequestNo = 0;
+
 interface StudentState {
   students: Student[];
   isLoading: boolean;
-  fetchStudents: () => Promise<void>;
+  // Optional filter from FilterBar; nothing passed = all students
+  fetchStudents: (filter?: StudentFilter) => Promise<void>;
   // These return true on success, so the page knows when to clear its form
   createStudent: (values: StudentFormValues) => Promise<boolean>;
   updateStudent: (id: string, values: StudentFormValues) => Promise<boolean>;
@@ -48,13 +58,25 @@ export const useStudentStore = create<StudentState>()((set) => ({
   // true at the start, so the page shows a spinner instead of "No students yet" before the first load
   isLoading: true,
 
-  fetchStudents: async () => {
+  fetchStudents: async (filter = {}) => {
     set({ isLoading: true });
 
+    // Remember which request this is. If the user changes the filter again before this one
+    // answers, only the newest answer may fill the list.
+    const requestNo = ++latestRequestNo;
+
+    // Send only the filters that are set; "" means "All"
+    const params = {
+      classId: filter.classId || undefined,
+      sectionId: filter.sectionId || undefined,
+    };
+
     try {
-      const response = await api.get("/students");
+      const response = await api.get("/students", { params });
+      if (requestNo !== latestRequestNo) return;
       set({ students: response.data.students, isLoading: false });
     } catch (error) {
+      if (requestNo !== latestRequestNo) return;
       set({ students: [], isLoading: false });
       toast.error(getErrorMessage(error, "Could not load students"));
     }
