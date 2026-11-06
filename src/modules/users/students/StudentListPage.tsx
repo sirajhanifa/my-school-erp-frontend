@@ -36,10 +36,9 @@ const StudentListPage = () => {
   const classId = useFilterStore((state) => state.classId);
   const sectionId = useFilterStore((state) => state.sectionId);
 
-  // Load the students when the page opens, and again after each Search.
-  // Class is required here, so nothing is loaded until a class has been searched.
+  // Load the students when the page opens, and again after each Search
   useEffect(() => {
-    if (classId) fetchStudents({ classId, sectionId });
+    fetchStudents({ classId, sectionId });
   }, [fetchStudents, classId, sectionId]);
 
   const openAddForm = () => {
@@ -85,23 +84,18 @@ const StudentListPage = () => {
 
       {/* Students have no academic year yet, so only class and section */}
       <div className="mb-4">
-        <FilterBar fields={["class", "section"]} required={["class"]} />
+        <FilterBar fields={["class", "section"]} />
       </div>
 
       <List
-        // No class searched yet: show an empty list with a hint instead of old results
-        items={classId ? students : []}
+        items={students}
         getKey={(student) => student.id}
         getSearchText={(student) =>
           `${student.admissionNo} ${getFullName(student)} ${student.className} ${student.sectionName} ${student.guardianName} ${student.phone}`
         }
         searchPlaceholder="Search students..."
-        isLoading={classId ? isLoading : false}
-        emptyMessage={
-          classId
-            ? "No students found. Click Add Student to create one."
-            : "Select a class and click Search to see students."
-        }
+        isLoading={isLoading}
+        emptyMessage="No students found. Click Add Student to create one."
         columns={[
           { header: "Admission No", render: (student) => student.admissionNo, className: "whitespace-nowrap" },
           {
