@@ -7,6 +7,7 @@ import SectionListPage from "./modules/organization-setup/sections/SectionListPa
 import AcademicYearListPage from "./modules/organization-setup/academic-years/AcademicYearListPage";
 import StudentListPage from "./modules/users/students/StudentListPage";
 import EmployeeListPage from "./modules/users/employees/EmployeeListPage";
+import RoleListPage from "./modules/settings/roles/RoleListPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
 import Toaster from "./components/toast/Toaster";
@@ -40,6 +41,7 @@ const App = () => {
           <Route path="/organization-setup/academic-years" element={<AcademicYearListPage />} />
           <Route path="/users/students" element={<StudentListPage />} />
           <Route path="/users/employees" element={<EmployeeListPage />} />
+          <Route path="/settings/roles" element={<RoleListPage />} />
         </Route>
       </Routes>
       <Toaster />
