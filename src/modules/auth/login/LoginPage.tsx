@@ -7,9 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { loginSchema, type LoginFormValues } from "../../../schemas/loginSchema";
+import {
+  loginSchema,
+  type LoginFormValues,
+} from "../../../schemas/loginSchema";
 import { useAuthStore } from "../../../store/authStore";
 import { toast } from "../../../store/toastStore";
+import loginBg from "@/assets/login1.jpg";
 
 const LoginPage = () => {
   const {
@@ -43,11 +47,21 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="w-full max-w-md">
+    // Full-page background photo; cover + center fills the screen without stretching
+    <div
+      className="relative flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat px-4 py-12"
+      style={{ backgroundImage: `url(${loginBg})` }}
+    >
+      {/* Dark overlay so the heading and form stay readable over the photo */}
+      <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
+
+      {/* relative keeps the form above the overlay */}
+      <div className="relative w-full max-w-md">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold text-slate-900">My School ERP</h1>
-          <p className="mt-1 text-sm text-slate-500">Sign in to your account to continue</p>
+          <h1 className="text-2xl font-semibold text-white">My School ERP</h1>
+          <p className="mt-1 text-sm text-white/80">
+            Sign in to your account to continue
+          </p>
         </div>
 
         <Card className="mx-auto w-full max-w-md gap-0 py-0">
@@ -57,7 +71,11 @@ const LoginPage = () => {
 
           <CardContent className="px-4 py-6 sm:px-8">
             {/* noValidate: validation is handled by Zod, not the browser's built-in popups */}
-            <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              noValidate
+              className="space-y-8"
+            >
               <div className="space-y-6">
                 {error && (
                   <Alert variant="destructive">
@@ -69,7 +87,10 @@ const LoginPage = () => {
                 <Field data-invalid={!!errors.email}>
                   <FieldLabel htmlFor="login-email">
                     Email
-                    <span className="-ml-1.5 text-destructive" aria-hidden="true">
+                    <span
+                      className="-ml-1.5 text-destructive"
+                      aria-hidden="true"
+                    >
                       *
                     </span>
                   </FieldLabel>
@@ -79,16 +100,25 @@ const LoginPage = () => {
                     placeholder="you@school.com"
                     aria-required
                     aria-invalid={!!errors.email}
-                    aria-describedby={errors.email ? "login-email-error" : undefined}
+                    aria-describedby={
+                      errors.email ? "login-email-error" : undefined
+                    }
                     {...register("email")}
                   />
-                  {errors.email && <FieldError id="login-email-error">{errors.email.message}</FieldError>}
+                  {errors.email && (
+                    <FieldError id="login-email-error">
+                      {errors.email.message}
+                    </FieldError>
+                  )}
                 </Field>
 
                 <Field data-invalid={!!errors.password}>
                   <FieldLabel htmlFor="login-password">
                     Password
-                    <span className="-ml-1.5 text-destructive" aria-hidden="true">
+                    <span
+                      className="-ml-1.5 text-destructive"
+                      aria-hidden="true"
+                    >
                       *
                     </span>
                   </FieldLabel>
@@ -98,18 +128,28 @@ const LoginPage = () => {
                     placeholder="Enter your password"
                     aria-required
                     aria-invalid={!!errors.password}
-                    aria-describedby={errors.password ? "login-password-error" : undefined}
+                    aria-describedby={
+                      errors.password ? "login-password-error" : undefined
+                    }
                     {...register("password")}
                   />
                   {errors.password && (
-                    <FieldError id="login-password-error">{errors.password.message}</FieldError>
+                    <FieldError id="login-password-error">
+                      {errors.password.message}
+                    </FieldError>
                   )}
                 </Field>
               </div>
 
               {/* Full-width submit button; aria-busy tells screen readers the form is being submitted */}
               <div className="flex flex-col gap-3 border-t pt-6">
-                <Button type="submit" size="lg" disabled={isLoading} aria-busy={isLoading} className="min-w-24">
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={isLoading}
+                  aria-busy={isLoading}
+                  className="min-w-24"
+                >
                   {isLoading && <Spinner />}
                   {isLoading ? "Please wait..." : "Login"}
                 </Button>
