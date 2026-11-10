@@ -10,6 +10,7 @@ import type { AppLayoutContext } from "../../../components/layout/AppLayout";
 import { useFilterStore } from "../../../store/filterStore";
 import { useStudentStore, type Student } from "../../../store/studentStore";
 import StudentCreatePage from "./StudentCreatePage";
+import StudentImportDialog from "./StudentImportDialog";
 
 // Full name for the list and the delete confirmation
 const getFullName = (student: Student) => `${student.firstName} ${student.lastName}`.trim();
@@ -31,6 +32,8 @@ const StudentListPage = () => {
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   // The student waiting for delete confirmation; null = no popup
   const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
+  // true = the Excel import popup is open
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   // The class / section picked in the FilterBar ("" = All)
   const classId = useFilterStore((state) => state.classId);
@@ -71,16 +74,24 @@ const StudentListPage = () => {
 
   return (
     <>
-      {/* "Add Student" in the topbar, only while the list is showing */}
+      {/* "Import" and "Add Student" in the topbar, only while the list is showing */}
       {topbarActions &&
         createPortal(
-          <Button size="lg" onClick={openAddForm} aria-label="Add Student">
-            <Icon name="Plus" size={16} />
-            {/* Icon only on phones, to save space */}
-            <span className="hidden sm:inline">Add Student</span>
-          </Button>,
+          <div className="flex gap-2">
+            <Button size="lg" variant="outline" onClick={() => setIsImportOpen(true)} aria-label="Import Students">
+              <Icon name="FileSpreadsheet" size={16} />
+              <span className="hidden sm:inline">Import</span>
+            </Button>
+            <Button size="lg" onClick={openAddForm} aria-label="Add Student">
+              <Icon name="Plus" size={16} />
+              {/* Icon only on phones, to save space */}
+              <span className="hidden sm:inline">Add Student</span>
+            </Button>
+          </div>,
           topbarActions,
         )}
+
+      <StudentImportDialog open={isImportOpen} onClose={() => setIsImportOpen(false)} />
 
       {/* Students have no academic year yet, so only class and section */}
       <div className="mb-4">

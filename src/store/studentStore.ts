@@ -2,6 +2,7 @@ import { isAxiosError } from "axios";
 import { create } from "zustand";
 import api from "../components/axios/axios";
 import type { StudentFormValues } from "../schemas/studentSchema";
+import { useFilterStore } from "./filterStore";
 import { toast } from "./toastStore";
 
 // A student as returned by the backend
@@ -28,6 +29,12 @@ export interface StudentFilter {
   sectionId?: string;
 }
 
+// One problem found in an uploaded Excel file ("row" is the Excel row number)
+export interface ImportError {
+  row: number;
+  message: string;
+}
+
 // Counts list requests, so a slow old answer cannot overwrite a newer one
 let latestRequestNo = 0;
 
@@ -40,6 +47,10 @@ interface StudentState {
   createStudent: (values: StudentFormValues) => Promise<boolean>;
   updateStudent: (id: string, values: StudentFormValues) => Promise<boolean>;
   deleteStudent: (id: string) => Promise<boolean>;
+  // Excel import: downloads the template / uploads a filled file
+  downloadTemplate: () => Promise<void>;
+  // ok = all students saved; errors = the rows to fix (nothing is saved when there are errors)
+  importStudents: (file: File) => Promise<{ ok: boolean; errors: ImportError[] }>;
 }
 
 // Shows the backend's message if there is one, otherwise the fallback
@@ -121,6 +132,42 @@ export const useStudentStore = create<StudentState>()((set) => ({
     } catch (error) {
       toast.error(getErrorMessage(error, "Could not delete the student"));
       return false;
+    }
+  },
+
+  downloadTemplate: async () => {
+    try {
+      const response = await api.get("/students/import/template", { responseType: "blob" });
+      // Save the file through a temporary link, since axios can't trigger a download itself
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "student-import-template.xlsx";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // The error body is a blob here, so we can't read its message; show a fixed one
+      toast.error("Could not download the template");
+    }
+  },
+
+  importStudents: async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      // Our axios default is JSON, which would turn the FormData into JSON; the browser adds the boundary
+      const response = await api.post("/students/import", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success(response.data.message);
+      // Many students were added, so reload the list (with the current filter)
+      const { classId, sectionId } = useFilterStore.getState();
+      await useStudentStore.getState().fetchStudents({ classId, sectionId });
+      return { ok: true, errors: [] };
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Could not import the students"));
+      const errors: ImportError[] = (isAxiosError(error) && error.response?.data?.errors) || [];
+      return { ok: false, errors };
     }
   },
 }));
