@@ -26,25 +26,28 @@ export interface MainMenu {
 interface ModuleState {
   modules: MainMenu[];
   isLoading: boolean;
+  // true once the first load has finished, so ModuleRoute doesn't block pages before the menu arrives
+  hasLoaded: boolean;
   fetchModules: () => Promise<void>;
   reset: () => void;
 }
 
-// Holds the menu of the logged-in user's school.
-// The backend decides which school from the auth cookie, so we never send a school id.
+// Holds the menu of the logged-in user's school, with only the modules their role allows.
+// The backend decides which school and role from the auth cookie, so we never send them.
 export const useModuleStore = create<ModuleState>()((set) => ({
   modules: [],
   isLoading: false,
+  hasLoaded: false,
 
   fetchModules: async () => {
     set({ isLoading: true });
 
     try {
       const response = await api.get("/modules");
-      set({ modules: response.data.modules, isLoading: false });
+      set({ modules: response.data.modules, isLoading: false, hasLoaded: true });
     } catch (error) {
       // Keep the menu we already have, so a failed reload doesn't empty the sidebar
-      set({ isLoading: false });
+      set({ isLoading: false, hasLoaded: true });
       // Show the backend's message if there is one, otherwise a generic one
       const message = isAxiosError(error) ? error.response?.data?.message : undefined;
       toast.error(message ?? "Could not load the menu");
@@ -52,5 +55,5 @@ export const useModuleStore = create<ModuleState>()((set) => ({
   },
 
   // Called on logout, so the next user never sees the previous school's menu
-  reset: () => set({ modules: [], isLoading: false }),
+  reset: () => set({ modules: [], isLoading: false, hasLoaded: false }),
 }));

@@ -36,7 +36,7 @@ src/
 
 ## Conventions
 
-- **Pages**: add under `src/modules/<feature>/`, register in `App.tsx`, wrap in `<ProtectedRoute>` unless public.
+- **Pages**: add under `src/modules/<feature>/`, register in `App.tsx`, wrap in `<ProtectedRoute>` unless public. Module pages go inside the `<ModuleRoute />` route, which only opens paths that are in the user's (role-filtered) menu.
 - **Forms**: React Hook Form with `zodResolver(schema)`. Put the schema in `src/schemas/<name>Schema.ts` and export `type XFormValues = z.infer<typeof xSchema>`. Validation rules live in the Zod schema; the `required` prop on form components only shows the `*` marker.
 - **Use the form kit** in `components/form/` instead of raw inputs: `FormContainer`, `FormSection`, `FormInput`, `FormSelect`, `FormAutocomplete`, `FormCheckbox`, `FormDatePicker`, `FormTextarea`, `FormActions`. They wrap shadcn components (Field, Input, Select, Combobox, Calendar, Card, Button) and keep a simple props API. Components are generic over the form type: `FormInput`/`FormTextarea` take `register` + `error`; `FormSelect`, `FormAutocomplete`, `FormCheckbox`, `FormDatePicker` take `control`.
 - **Lists**: use `components/list/List.tsx` for list pages — pass `items`, `columns` (`{ header, render, className? }`), `getKey` and `getSearchText`. Search and pagination run in the browser on the loaded items.

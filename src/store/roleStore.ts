@@ -2,20 +2,29 @@ import { isAxiosError } from "axios";
 import { create } from "zustand";
 import api from "../components/axios/axios";
 import type { RoleFormValues } from "../schemas/roleSchema";
+import type { MainMenu } from "./moduleStore";
 import { toast } from "./toastStore";
+
+// The superadmin role always has access to every module (the backend checks this too)
+export const FULL_ACCESS_ROLE = "superadmin";
 
 // A role as returned by the backend
 export interface Role {
   id: string;
   name: string;
   description: string;
+  modules: string[]; // menu codes this role can open
   createdAt: string;
 }
 
 interface RoleState {
   roles: Role[];
   isLoading: boolean;
+  // The school's full menu, shown as checkboxes on the Role form
+  allModules: MainMenu[];
+  isModulesLoading: boolean;
   fetchRoles: () => Promise<void>;
+  fetchAllModules: () => Promise<void>;
   // These return true on success, so the page knows when to close its form
   createRole: (values: RoleFormValues) => Promise<boolean>;
   updateRole: (id: string, values: RoleFormValues) => Promise<boolean>;
@@ -33,6 +42,20 @@ export const useRoleStore = create<RoleState>()((set) => ({
   roles: [],
   // true at the start, so the page shows placeholders instead of "No roles yet" before the first load
   isLoading: true,
+  allModules: [],
+  isModulesLoading: false,
+
+  fetchAllModules: async () => {
+    set({ isModulesLoading: true });
+
+    try {
+      const response = await api.get("/modules/all");
+      set({ allModules: response.data.modules, isModulesLoading: false });
+    } catch (error) {
+      set({ allModules: [], isModulesLoading: false });
+      toast.error(getErrorMessage(error, "Could not load the modules"));
+    }
+  },
 
   fetchRoles: async () => {
     set({ isLoading: true });

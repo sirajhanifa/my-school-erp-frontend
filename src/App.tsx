@@ -9,6 +9,7 @@ import StudentListPage from "./modules/users/students/StudentListPage";
 import EmployeeListPage from "./modules/users/employees/EmployeeListPage";
 import RoleListPage from "./modules/settings/roles/RoleListPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ModuleRoute from "./components/ModuleRoute";
 import AppLayout from "./components/layout/AppLayout";
 import Toaster from "./components/toast/Toaster";
 import { useAuthStore } from "./store/authStore";
@@ -35,13 +36,16 @@ const App = () => {
             </ProtectedRoute>
           }
         >
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/organization-setup/classes" element={<ClassListPage />} />
-          <Route path="/organization-setup/sections" element={<SectionListPage />} />
-          <Route path="/organization-setup/academic-years" element={<AcademicYearListPage />} />
-          <Route path="/users/students" element={<StudentListPage />} />
-          <Route path="/users/employees" element={<EmployeeListPage />} />
-          <Route path="/settings/roles" element={<RoleListPage />} />
+          {/* ModuleRoute only opens pages the user's role allows */}
+          <Route element={<ModuleRoute />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/organization-setup/classes" element={<ClassListPage />} />
+            <Route path="/organization-setup/sections" element={<SectionListPage />} />
+            <Route path="/organization-setup/academic-years" element={<AcademicYearListPage />} />
+            <Route path="/users/students" element={<StudentListPage />} />
+            <Route path="/users/employees" element={<EmployeeListPage />} />
+            <Route path="/settings/roles" element={<RoleListPage />} />
+          </Route>
         </Route>
       </Routes>
       <Toaster />
